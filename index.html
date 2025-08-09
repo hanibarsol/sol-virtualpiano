@@ -2,13 +2,29 @@
 <html lang="he">
 <head>
 
-  <img src="thelogo.png" alt="לוגו סול" style="width: 220px;  style="margin: 0; padding: 0; margin-bottom: 0px; 
-  text-align: center; max-width: 100%;
-  height: auto;">
-  
-  <meta charset="UTF-8">
-  <title>הפסנתר של סול 🎹</title>
-  <style>
+ <style>
+    .logo-container {
+      margin: 0;
+      padding: 0;
+      text-align: center; /* ממרכז את התמונה */
+    }
+    .logo-container img {
+      width: 220px;       /* גודל רגיל במחשב */
+      max-width: 100%;    /* לא יעבור את המסך */
+      height: auto;
+    }
+    @media (max-width: 600px) {
+      .logo-container img {
+        width: 160px; /* מקטין בפלאפון */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <img src="thelogo.png" alt="לוגו סול">
+  </div>
+</body>
     body {
       background: #f0f8ff;
       text-align: center;
@@ -174,6 +190,7 @@
 </body>
   
 </html>
+
 
 
 

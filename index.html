@@ -2,16 +2,14 @@
 <html lang="he">
 <head>
 
- 
+ <img src="thelogo.png" alt="לוגו סול" style="width: 220px;  style="margin: 0; padding: 0; margin-bottom: 0px; 
+  text-align: center; max-width: 100%;
+  height: auto;"> 
   
   <meta charset="UTF-8">
   <title>הפסנתר של סול 🎹</title>
   <style>
     body {
-     <img src="thelogo.png" alt="לוגו סול" style="width: 220px;  style="margin: 0; padding: 0; margin-bottom: 0px; 
-  text-align: center; max-width: 100%;
-  height: auto;"> 
-     
       background: #f0f8ff;
       text-align: center;
       font-family: Arial;
@@ -38,7 +36,7 @@
       box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
       transition: transform 0.1s;
       cursor: pointer;
-      z-index: 2;
+      z-index: 1;
       touch-action: manipulation;
     }
     .key img {
@@ -59,7 +57,7 @@
       background: black;
       position: absolute;
       top: 0;
-      z-index: 1;
+      z-index: 2;
       left: 55px;
       border: 1px solid #333;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
@@ -163,7 +161,7 @@
         e.preventDefault();
         playSound(note);
       };
- key.addEventListener("pointerdown", handler);
+
       key.addEventListener("click", handler);
       key.addEventListener("touchstart", handler, { passive: false });
     });
@@ -176,10 +174,6 @@
 </body>
   
 </html>
-
-
-
-
 
 
 

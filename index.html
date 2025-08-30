@@ -24,6 +24,16 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+   
+/* שינוי כשיש סיבוב למסך רחב */
+@media (min-width: 768px) {
+  .keyboard {
+    flex-wrap: wrap; /* זה יעזור אם יש בעיית מיקום */
+  }
+  .key-wrapper {
+    width: auto; /* ייתן לכל קליד להיות בגודל המתאים */
+  }
+ 
     .key-wrapper {
       position: relative;
     }
@@ -175,6 +185,7 @@
 </body>
   
 </html>
+
 
 
 

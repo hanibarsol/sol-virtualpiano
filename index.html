@@ -2,7 +2,7 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>הפסנתר של סול 🎹</title>
   <style>
     body {
@@ -25,12 +25,15 @@
       border: 4px solid #000;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      touch-action: none; /* מניעת pinch/double-tap */
+     width: 100%;       /* המקלדת תמיד נכנסת למסך */
+  max-width: 100vw;  /* לא חורגת */
     }
 
     .key-wrapper {
-      position: relative;
+    position: relative;
+      flex: 1; 
     }
+    
 
     .key {
       width: 80px;
@@ -223,3 +226,4 @@
 
 </body>
 </html>
+

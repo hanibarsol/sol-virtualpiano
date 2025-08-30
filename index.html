@@ -16,70 +16,59 @@
       user-select: none;
     }
 
-    .keyboard {
-      display: inline-flex;
-      justify-content: center;
-      margin-top: 35px;
-      padding: 10px;
-      background-color: #fff;
-      border: 4px solid #000;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-     width: 100%;       /* המקלדת תמיד נכנסת למסך */
+   .keyboard {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 5px;
+  background-color: #fff;
+  border: 4px solid #000;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  width: 100%;       /* המקלדת תמיד נכנסת למסך */
   max-width: 100vw;  /* לא חורגת */
-    }
+}
 
-    .key-wrapper {
-    position: relative;
-      flex: 1; 
-    }
-    
+.key-wrapper {
+  position: relative;
+  flex: 1;           /* כל קליד תופס חלק יחסי מהרוחב */
+}
 
-    .key {
-      width: 80px;
-      height: 300px;
-      background: white;
-      border: 1px solid #ccc;
-      margin: 0 1px;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-      transition: transform 0.1s, background-color 0.1s;
-      cursor: pointer;
-      position: relative;
-      z-index: 1;
-      touch-action: none; /* מניעת pinch/double-tap */
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
+.key {
+  width: 100%;
+  aspect-ratio: 80/300;  /* יחס גובה/רוחב של קליד לבן */
+  background: white;
+  border: 1px solid #ccc;
+  margin: 0 1px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  transition: transform 0.1s, background-color 0.1s;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  touch-action: none;
+  user-select: none;
+}
 
-    .key img {
-      width: 82px;
-      height: 130px;
-      position: absolute;
-      bottom: 7px;
-      left: 1px;
-      pointer-events: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
+.key img {
+  width: 100%;
+  height: auto;
+  position: absolute;
+  bottom: 7px;
+  left: 0;
+  pointer-events: none;
+}
 
-    .key.black {
-      width: 50px;
-      height: 160px;
-      background: black;
-      position: absolute;
-      top: 0;
-      left: 55px;
-      border: 1px solid #333;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-      z-index: 2;
-      cursor: pointer;
-    }
+.key.black {
+  position: absolute;
+  top: 0;
+  left: 65%;
+  width: 60%;
+  aspect-ratio: 50/160; /* יחס של קליד שחור */
+  background: black;
+  border: 1px solid #333;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+  z-index: 2;
+}
 
     .key.black:active {
       background-color: #444;
@@ -226,4 +215,5 @@
 
 </body>
 </html>
+
 

@@ -41,6 +41,11 @@
       position: relative;
       z-index: 1;
       touch-action: manipulation;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .key img {
@@ -50,6 +55,10 @@
       bottom: 7px;
       left: 1px;
       pointer-events: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
 
     .key.black {
@@ -79,10 +88,11 @@
 <body>
 
   <!-- הלוגו -->
-  <img src="thelogo.png" alt="לוגו סול" style="width: 220px; max-width: 100%; height: auto; margin: 0 auto; display: block;">
+  <img src="thelogo.png" alt="לוגו סול" style="width: 220px; max-width: 100%; height: auto; margin: 0 auto; display: block; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;">
 
   <!-- הקלידים -->
   <div class="keyboard">
+    <!-- הקלידים כמו שהיו -->
     <div class="key-wrapper">
       <div class="key" data-note="c3"><img src="דו.png" alt=""></div>
       <div class="key black" data-note="cd3"></div>
@@ -187,6 +197,22 @@
     });
 
     window.addEventListener("pointerdown", initAudioContext, { once: true });
+
+    // מניעת double-tap zoom במובייל
+    document.addEventListener("touchstart", function (e) {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    let lastTouch = 0;
+    document.addEventListener("touchend", function (e) {
+      const now = new Date().getTime();
+      if (now - lastTouch <= 300) {
+        e.preventDefault();
+      }
+      lastTouch = now;
+    });
   </script>
 
 </body>

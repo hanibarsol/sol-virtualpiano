@@ -23,6 +23,7 @@
       border: 4px solid #000;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      touch-action: none;
     }
     .key-wrapper {
       position: relative;
@@ -51,6 +52,10 @@
       transform: scale(0.98);
       background-color: #CCC;
     }
+   .key.active {
+  transform: scale(0.98);
+  background-color: #CCC;
+}
     .key.black {
       width: 50px;
       height: 160px;
@@ -150,23 +155,29 @@
       .catch(err => console.error("שגיאה בטעינת צליל:", err));
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const keys = document.querySelectorAll(".key, .key.black");
+ document.addEventListener("DOMContentLoaded", () => {
+  const keys = document.querySelectorAll(".key, .key.black");
 
-    keys.forEach(key => {
-      const note = key.getAttribute("data-note");
-      if (!note) return;
-  
-      const handler = (e) => {
-        e.preventDefault();
-        playSound(note);
-      };
+  keys.forEach(key => {
+    const note = key.getAttribute("data-note");
+    if (!note) return;
 
-      key.addEventListener("pointerdown", handler);
-      key.addEventListener("touchstart", handler, { passive: false });
-    });
+    const handler = (e) => {
+      e.preventDefault();
+      playSound(note);
+
+      // הוספת class לחיווי
+      key.classList.add('active');
+
+      // הסרת החיווי לאחר 150ms
+      setTimeout(() => {
+        key.classList.remove('active');
+      }, 150);
+    };
+
+    key.addEventListener("pointerdown", handler);
   });
-
+});
   window.addEventListener("click", initAudioContext, { once: true });
   window.addEventListener("touchstart", initAudioContext, { once: true });
 </script>
@@ -174,6 +185,7 @@
 </body>
   
 </html>
+
 
 
 

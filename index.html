@@ -11,9 +11,14 @@
       font-family: Arial;
       margin: 0;
       padding: 0;
-      touch-action: none; /* מניעת pinch/double-tap */
       -webkit-user-select: none;
       user-select: none;
+    }
+
+    /* עוטף את המקלדת ומטפל בסקייל */
+    .keyboard-wrapper {
+      width: 100vw;
+      overflow: hidden;
     }
 
     .keyboard {
@@ -25,7 +30,7 @@
       border: 4px solid #000;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      touch-action: none; /* מניעת pinch/double-tap */
+      transform-origin: top center;
     }
 
     .key-wrapper {
@@ -43,12 +48,12 @@
       cursor: pointer;
       position: relative;
       z-index: 1;
-      touch-action: none; /* מניעת pinch/double-tap */
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
+      touch-action: none;
     }
 
     .key img {
@@ -95,61 +100,62 @@
   <img src="thelogo.png" alt="לוגו סול" 
        style="width: 220px; max-width: 100%; height: auto; margin: 0 auto; display: block; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; pointer-events:none;">
 
-  <!-- הקלידים -->
-  <div class="keyboard">
-    <div class="key-wrapper">
-      <div class="key" data-note="c3"><img src="דו.png" alt=""></div>
-      <div class="key black" data-note="cd3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="d3"><img src="רה.png" alt=""></div>
-      <div class="key black" data-note="dd3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="e3"><img src="מי.png" alt=""></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="f3"><img src="פה.png" alt=""></div>
-      <div class="key black" data-note="fd3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="g3"><img src="סול.png" alt=""></div>
-      <div class="key black" data-note="gd3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="a3"><img src="לה.png" alt=""></div>
-      <div class="key black" data-note="ad3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="b3"><img src="סי.png" alt=""></div>
-    </div>
-
-    <!-- אוקטבה רביעית -->
-    <div class="key-wrapper">
-      <div class="key" data-note="c4"><img src="דו.png" alt=""></div>
-      <div class="key black" data-note="cd4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="d4"><img src="רה.png" alt=""></div>
-      <div class="key black" data-note="dd4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="e4"><img src="מי.png" alt=""></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="f4"><img src="פה.png" alt=""></div>
-      <div class="key black" data-note="fd4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="g4"><img src="סול.png" alt=""></div>
-      <div class="key black" data-note="gd4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="a4"><img src="לה.png" alt=""></div>
-      <div class="key black" data-note="ad4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="b4"><img src="סי.png" alt=""></div>
+  <!-- עטיפה חיצונית -->
+  <div class="keyboard-wrapper">
+    <div class="keyboard" id="keyboard">
+      <div class="key-wrapper">
+        <div class="key" data-note="c3"><img src="דו.png" alt=""></div>
+        <div class="key black" data-note="cd3"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="d3"><img src="רה.png" alt=""></div>
+        <div class="key black" data-note="dd3"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="e3"><img src="מי.png" alt=""></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="f3"><img src="פה.png" alt=""></div>
+        <div class="key black" data-note="fd3"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="g3"><img src="סול.png" alt=""></div>
+        <div class="key black" data-note="gd3"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="a3"><img src="לה.png" alt=""></div>
+        <div class="key black" data-note="ad3"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="b3"><img src="סי.png" alt=""></div>
+      </div>
+      <!-- אוקטבה רביעית -->
+      <div class="key-wrapper">
+        <div class="key" data-note="c4"><img src="דו.png" alt=""></div>
+        <div class="key black" data-note="cd4"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="d4"><img src="רה.png" alt=""></div>
+        <div class="key black" data-note="dd4"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="e4"><img src="מי.png" alt=""></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="f4"><img src="פה.png" alt=""></div>
+        <div class="key black" data-note="fd4"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="g4"><img src="סול.png" alt=""></div>
+        <div class="key black" data-note="gd4"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="a4"><img src="לה.png" alt=""></div>
+        <div class="key black" data-note="ad4"></div>
+      </div>
+      <div class="key-wrapper">
+        <div class="key" data-note="b4"><img src="סי.png" alt=""></div>
+      </div>
     </div>
   </div>
 
@@ -202,32 +208,17 @@
 
     window.addEventListener("pointerdown", initAudioContext, { once: true });
 
-    // מניעת double-tap zoom במובייל
-    document.addEventListener("touchstart", function (e) {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+    // חישוב גודל מקלדת והקטנה אוטומטית
+    function resizeKeyboard() {
+      const kb = document.getElementById("keyboard");
+      const kbWidth = kb.scrollWidth; // רוחב אמיתי של המקלדת
+      const screenWidth = window.innerWidth;
+      const scale = screenWidth / kbWidth;
+      kb.style.transform = `scale(${scale})`;
+    }
 
-    let lastTouch = 0;
-    document.addEventListener("touchend", function (e) {
-      const now = new Date().getTime();
-      if (now - lastTouch <= 300) {
-        e.preventDefault();
-      }
-      lastTouch = now;
-    });
-
-    // מניעת pinch-zoom (אצבעות)
-    document.addEventListener("gesturestart", function (e) {
-      e.preventDefault();
-    });
-    document.addEventListener("gesturechange", function (e) {
-      e.preventDefault();
-    });
-    document.addEventListener("gestureend", function (e) {
-      e.preventDefault();
-    });
+    window.addEventListener("resize", resizeKeyboard);
+    window.addEventListener("load", resizeKeyboard);
   </script>
 
 </body>

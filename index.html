@@ -170,36 +170,50 @@
           source.start(0);
         })
         .catch(err => console.error("שגיאה בטעינת צליל:", err));
+    }let lastKey = null;
+
+function getKeyFromPoint(x, y) {
+  const elem = document.elementFromPoint(x, y);
+  if (elem && (elem.classList.contains("key") || elem.classList.contains("black"))) {
+    return elem;
+  }
+  return null;
+}
+
+// גרירה עם עכבר / עט
+document.addEventListener("pointermove", (e) => {
+  if (e.buttons === 0) return; // לא לוחץ עכבר
+  const key = getKeyFromPoint(e.clientX, e.clientY);
+  if (key && key !== lastKey) {
+    const note = key.getAttribute("data-note");
+    if (note) {
+      playSound(note);
+      key.classList.add("active");
+      setTimeout(() => key.classList.remove("active"), 150);
     }
-    // --- נגינה ברצף עם גרירה ---
-    let lastKey = null;
+    lastKey = key;
+  }
+});
+document.addEventListener("pointerup", () => { lastKey = null; });
 
-    function getKeyFromPoint(x, y) {
-      const elem = document.elementFromPoint(x, y);
-      if (elem && (elem.classList.contains("key") || elem.classList.contains("black"))) {
-        return elem;
-      }
-      return null;
+// גרירה עם אצבע (מובייל)
+document.addEventListener("touchmove", (e) => {
+  const touch = e.touches[0];
+  const key = getKeyFromPoint(touch.clientX, touch.clientY);
+  if (key && key !== lastKey) {
+    const note = key.getAttribute("data-note");
+    if (note) {
+      playSound(note);
+      key.classList.add("active");
+      setTimeout(() => key.classList.remove("active"), 150);
     }
+    lastKey = key;
+  }
+}, { passive: false });
 
-    document.addEventListener("pointermove", (e) => {
-      if (e.pressure === 0) return; // אם אין נגיעה (האצבע מורמת), לא לעשות כלום
-      const key = getKeyFromPoint(e.clientX, e.clientY);
-      if (key && key !== lastKey) {
-        const note = key.getAttribute("data-note");
-        if (note) {
-          playSound(note);
-
-          key.classList.add("active");
-          setTimeout(() => key.classList.remove("active"), 150);
-        }
-        lastKey = key;
-      }
-    });
-
-    document.addEventListener("pointerup", () => {
-      lastKey = null;
-    });
+document.addEventListener("touchend", () => {
+  lastKey = null;
+});
     document.addEventListener("DOMContentLoaded", () => {
       const keys = document.querySelectorAll(".key, .key.black");
 
@@ -245,6 +259,7 @@
 
 </body>
 </html>
+
 
 
 

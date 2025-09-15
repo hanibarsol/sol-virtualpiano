@@ -239,16 +239,13 @@ document.addEventListener("touchend", () => {
     });
 
     window.addEventListener("pointerdown", initAudioContext, { once: true });
- // --- ביטול זום בהקשה כפולה ---
-    let lastTouch = 0;
+
+    // מניעת double-tap zoom במובייל
     document.addEventListener("touchstart", function (e) {
-      const now = Date.now();
-      if (now - lastTouch <= 300) {
-        e.preventDefault(); // מונע double-tap zoom
+      if (e.touches.length > 1) {
+        e.preventDefault();
       }
-      lastTouch = now;
     }, { passive: false });
-   
 
     let lastTouch = 0;
     document.addEventListener("touchend", function (e) {
@@ -264,6 +261,7 @@ document.addEventListener("touchend", () => {
 
 </body>
 </html>
+
 
 
 

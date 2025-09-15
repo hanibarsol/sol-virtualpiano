@@ -248,12 +248,7 @@ document.addEventListener("touchend", () => {
       }
       lastTouch = now;
     }, { passive: false });
-    // מניעת double-tap zoom במובייל
-    document.addEventListener("touchstart", function (e) {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+   
 
     let lastTouch = 0;
     document.addEventListener("touchend", function (e) {
@@ -269,6 +264,7 @@ document.addEventListener("touchend", () => {
 
 </body>
 </html>
+
 
 
 

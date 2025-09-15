@@ -239,7 +239,15 @@ document.addEventListener("touchend", () => {
     });
 
     window.addEventListener("pointerdown", initAudioContext, { once: true });
-
+ // --- ביטול זום בהקשה כפולה ---
+    let lastTouch = 0;
+    document.addEventListener("touchstart", function (e) {
+      const now = Date.now();
+      if (now - lastTouch <= 300) {
+        e.preventDefault(); // מונע double-tap zoom
+      }
+      lastTouch = now;
+    }, { passive: false });
     // מניעת double-tap zoom במובייל
     document.addEventListener("touchstart", function (e) {
       if (e.touches.length > 1) {
@@ -261,6 +269,7 @@ document.addEventListener("touchend", () => {
 
 </body>
 </html>
+
 
 
 

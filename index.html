@@ -2,8 +2,8 @@
 <html lang="he">
 <head>
     <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>הפסנתר הוירטואלי של סול</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>פסנתר דמויות סופי</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body, html { 
@@ -14,90 +14,95 @@
         
         #start-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); color: white; display: flex; 
+            background: rgba(0,0,0,0.95); color: white; display: flex; 
             justify-content: center; align-items: center; z-index: 1000; 
             cursor: pointer; text-align: center; 
         }
 
         #piano-scroll-wrapper {
-            width: 100%;
+            width: 100vw;
             height: 100%;
             overflow-x: auto; 
             overflow-y: hidden;
-            display: flex;
-            justify-content: flex-start; /* הצמדה לשמאל/ימין למניעת רווח מוזר */
-            align-items: center; 
+            display: block; /* שינוי לבלוק כדי שהגלילה תהיה חלקה יותר */
             -webkit-overflow-scrolling: touch;
         }
 
         #piano-container { 
-            display: flex; 
-            width: 100%; /* שימוש בכל הרווח הזמין */
-            min-width: max-content; 
-            height: 90vh; 
-            padding: 0; /* ביטול פדינג שיוצר שוליים שחורים */
+            display: grid;
+            grid-template-columns: repeat(14, 1fr); /* מחלק את כל הרווח ל-14 חלקים שווים בדיוק */
+            width: 100%; 
+            min-width: 1000px; /* מבטיח שהפסנתר לא יתכווץ מדי בטאבלט */
+            height: 100vh;
+            padding: 0;
+            margin: 0;
         }
 
-        .piano { display: flex; position: relative; direction: ltr; height: 100%; flex-grow: 1; }
-        
-    .key { 
+        .piano { 
+            display: contents; /* מאפשר לקלידים להיות חלק מהגריד של ה-container */
+            direction: ltr;
+        }
+
+        .key { 
             position: relative; border: 1px solid #000; box-sizing: border-box; 
             cursor: pointer; display: flex; flex-direction: column; 
-            justify-content: flex-end; /* דוחף הכל לתחתית */
-            align-items: center; 
-            padding-bottom: 40px; /* המרחק של הדמות מהקצה התחתון */
-            padding-top: 0; /* בטלי את ה-250 */
+            justify-content: flex-end; align-items: center; 
+            padding-bottom: 30px; /* מרחק מהתחתית */
+            background-color: white;
+            z-index: 1;
+            border-radius: 0 0 8px 8px;
         }
 
-        /* הגדלת הקלידים מעט כדי שימלאו את המסך */
-        .white-key { width: 7.14vw; min-width: 50px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 8px 8px; }
-        .black-key { width: 4.5vw; min-width: 32px; height: 60%; background-color: #333; z-index: 2; margin-left: -2.25vw; margin-right: -2.25vw; border-radius: 0 0 5px 5px; }
-        
-      /* התאמות למסכים קטנים/שוכבים */
-@media (max-height: 500px) {
-    #piano-container { height: 90vh; }
-    .white-key { width: 50px; }
-    .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
-    /* כאן אנחנו מוודאים שהתמונה עדיין נראית טוב גם כשהמסך נמוך */
-    .character-img { max-height: 45%; } 
-}
-
-/* התאמה לטלפונים במצב עומד */
-@media (max-width: 768px) and (orientation: portrait) {
-    .white-key { width: 48px; }
-    .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
-}
+        /* קלידים שחורים כאלמנטים צפים מעל הלבנים */
+        .black-key { 
+            position: absolute;
+            width: 30px; 
+            height: 60%; 
+            background-color: #333; 
+            z-index: 10; 
+            margin-left: -15px; /* ממרכז מעל החיבור */
+            border-radius: 0 0 5px 5px;
+            left: 0;
+        }
 
         .key.active { background-color: #ffeb3b !important; }
 
-       .character-img { 
+        .character-img { 
             width: 90%; 
-            height: auto; /* מאפשר לתמונה לשמור על הפרופורציות שלה */
-            max-height: 70%; /* כאן את קובעת כמה גדולה היא תהיה. תגדילי ל-60% אם את רוצה עוד יותר גדול */
+            height: auto;
+            max-height: 55%; 
             object-fit: contain;
             pointer-events: none; 
-            -webkit-user-drag: none; 
-            margin-bottom: 5px; 
+            -webkit-user-drag: none;
+            display: block; /* מבטיח שיראו אותן בכל הדפדפנים */
         }
-        
+
+        .spacer { flex-grow: 1; width: 100%; }
+
+        /* התאמות למובייל/טאבלט לרוחב */
+        @media (max-height: 500px) {
+            .key { padding-bottom: 10px; }
+            .character-img { max-height: 45%; }
+        }
     </style>
 </head>
 <body>
 
-<div id="start-screen"><h1>לחצו כאן להפעלה 🎹</h1></div>
+<div id="start-screen"><h1>לחצי כאן להפעלה 🎹</h1></div>
 
 <div id="piano-scroll-wrapper">
-    <div id="piano-container">
-        <div class="piano" id="piano" oncontextmenu="return false;"></div>
-    </div>
+    <div id="piano-container" id="piano">
+        </div>
 </div>
 
 <script>
     const startScreen = document.getElementById('start-screen');
+    const pianoContainer = document.getElementById('piano-container');
     let isMouseDown = false;
 
-    // שיפור לייטנסי (Delay)
-    Tone.context.latencyHint = 'interactive';
+    // הגדרות מהירות סאונד קריטיות לדיליי
+    Tone.context.latencyHint = 'fastest';
+    Tone.context.lookAhead = 0;
 
     startScreen.addEventListener('click', async () => {
         await Tone.start();
@@ -112,10 +117,6 @@
         "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"
     ];
 
-   // הגדרת לייטנסי נמוך במיוחד
-    Tone.context.latencyHint = 'fastest';
-    Tone.context.lookAhead = 0;
-
     const sampler = new Tone.Sampler({
         urls: {
             "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
@@ -124,69 +125,80 @@
             "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
         },
         baseUrl: "sounds/",
-        release: 1, 
-        onload: () => console.log("כל הצלילים נטענו!")
+        release: 1.5,
+        onload: () => console.log("Piano Loaded")
     }).toDestination();
-        
 
-    const pianoElement = document.getElementById('piano');
-    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B']; // רק הלבנים ליצירת הגריד
     const octaves = [3, 4];
     let whiteKeyIndex = 0;
 
+    // יצירת קלידים לבנים
     octaves.forEach(octave => {
         notes.forEach(note => {
-            const isBlack = note.includes('#');
             const fullNote = note + octave;
             const key = document.createElement('div');
-            key.className = `key ${isBlack ? 'black-key' : 'white-key'}`;
+            key.className = 'key';
             key.dataset.note = fullNote;
 
-           if (!isBlack) {
-                // יצירת שטח ריק שדוחף את הדמות למטה בלי להקטין אותה
-                const spacer = document.createElement('div');
-                spacer.style.flexGrow = "1"; // זה אומר לרווח לתפוס את כל השטח הפנוי למעלה
-                key.appendChild(spacer);
+            // הוספת ספייסר ודמות
+            const spacer = document.createElement('div');
+            spacer.className = 'spacer';
+            key.appendChild(spacer);
 
-                const img = document.createElement('img');
-                const imgName = characterImages[whiteKeyIndex];
-                img.src = imgName;
-                img.className = 'character-img';
-                img.draggable = false;
-                img.onerror = () => console.error("לא נמצאה תמונה בשם: " + imgName);
-                key.appendChild(img);
-                whiteKeyIndex++;
+            const img = document.createElement('img');
+            img.src = characterImages[whiteKeyIndex];
+            img.className = 'character-img';
+            img.onerror = () => { img.style.display = 'none'; }; // אם אין תמונה שלא יראו אייקון שבור
+            key.appendChild(img);
+
+            // הוספת קליד שחור (חוץ מאחרי E ו-B)
+            if (note !== 'E' && note !== 'B') {
+                const blackKey = document.createElement('div');
+                blackKey.className = 'black-key';
+                const blackNote = note + '#' + octave;
+                blackKey.dataset.note = blackNote;
+                
+                // תיקון שמות קבצים לדיאזים לפי הלוגיקה שלך
+                let fileNote = note.toLowerCase() + 'd' + octave + '.wav';
+                
+                blackKey.onmousedown = (e) => { e.stopPropagation(); play(blackNote, blackKey); };
+                blackKey.onmouseup = (e) => { e.stopPropagation(); stop(blackNote, blackKey); };
+                blackKey.ontouchstart = (e) => { e.stopPropagation(); play(blackNote, blackKey); };
+                blackKey.ontouchend = (e) => { e.stopPropagation(); stop(blackNote, blackKey); };
+                
+                key.appendChild(blackKey);
             }
 
-            const play = () => {
-                key.classList.add('active');
-                sampler.triggerAttack(fullNote);
+            const play = (n, el) => {
+                el.classList.add('active');
+                sampler.triggerAttack(n);
             };
-            const stop = () => {
-                key.classList.remove('active');
-                sampler.triggerRelease(fullNote);
+            const stop = (n, el) => {
+                el.classList.remove('active');
+                sampler.triggerRelease(n);
             };
 
-            key.onmousedown = (e) => { e.preventDefault(); play(); };
-            key.onmouseup = stop;
-            key.onmouseleave = stop;
-            key.onmouseenter = () => { if (isMouseDown) play(); };
+            key.onmousedown = () => play(fullNote, key);
+            key.onmouseup = () => stop(fullNote, key);
+            key.onmouseleave = () => stop(fullNote, key);
+            key.onmouseenter = () => { if (isMouseDown) play(fullNote, key); };
+            key.ontouchstart = (e) => { e.preventDefault(); play(fullNote, key); };
+            key.ontouchend = (e) => { e.preventDefault(); stop(fullNote, key); };
 
-            key.ontouchstart = (e) => { e.preventDefault(); play(); };
-            key.ontouchend = (e) => { e.preventDefault(); stop(); };
-
-            pianoElement.appendChild(key);
+            pianoContainer.appendChild(key);
+            whiteKeyIndex++;
         });
     });
 
+    // תיקון גרירה במובייל
     document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         const el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (el && el.classList.contains('key') && !el.classList.contains('active')) {
+        if (el && el.dataset.note && !el.classList.contains('active')) {
             sampler.triggerAttack(el.dataset.note);
             el.classList.add('active');
-            // זמן שחרור קצר יותר בהחלקה כדי לאפשר נגינה רציפה
-            setTimeout(() => el.classList.remove('active'), 250);
+            setTimeout(() => el.classList.remove('active'), 300);
         }
     }, { passive: false });
 </script>

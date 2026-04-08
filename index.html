@@ -6,34 +6,99 @@
     <title>פסנתר דמויות מתוקן</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a; user-select: none; -webkit-user-select: none; touch-action: none; }
-        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: white; display: flex; justify-content: center; align-items: center; z-index: 1000; cursor: pointer; text-align: center; }
-        #piano-container { display: flex; justify-content: center; align-items: flex-start; width: 100%; height: 85vh; padding-top: 40px; }
-        .piano { display: flex; position: relative; direction: ltr; height: 100%; }
-        .key { position: relative; border: 1px solid #000; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 15px; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
+            background-color: #1a1a1a; user-select: none; -webkit-user-select: none; 
+            touch-action: none; 
+        }
+        
+        #start-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); color: white; display: flex; 
+            justify-content: center; align-items: center; z-index: 1000; 
+            cursor: pointer; text-align: center; 
+        }
+
+        /* מכל שמאפשר גלילה הצידה במובייל אם הפסנתר רחב מהמסך */
+        #piano-scroll-wrapper {
+            width: 100%;
+            height: 100%;
+            overflow-x: auto; 
+            overflow-y: hidden;
+            display: flex;
+            align-items: center; 
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #piano-container { 
+            display: flex; 
+            justify-content: center; 
+            min-width: max-content; /* מונע מהפסנתר להתכווץ ברוחב */
+            height: 80vh; 
+            padding: 10px;
+        }
+
+        .piano { display: flex; position: relative; direction: ltr; height: 100%; -webkit-user-drag: none; }
+        
+        .key { 
+            position: relative; border: 1px solid #000; box-sizing: border-box; 
+            cursor: pointer; display: flex; flex-direction: column; 
+            justify-content: flex-end; align-items: center; padding-bottom: 15px;
+            -webkit-user-drag: none;
+        }
+
         .white-key { width: 65px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 8px 8px; }
         .black-key { width: 40px; height: 60%; background-color: #333; z-index: 2; margin-left: -20px; margin-right: -20px; border-radius: 0 0 5px 5px; }
+        
         .key.active { background-color: #ffeb3b !important; }
-        .character-img { width: 85%; pointer-events: none; -webkit-user-drag: none; margin-bottom: 5px; }
-        @media (max-width: 768px) { .white-key { width: 48px; } .black-key { width: 32px; margin-left: -16px; margin-right: -16px; } }
+
+        /* הגבלה ששומרת על הדמויות בפנים גם כשהמסך נמוך (למשל סמארטפון לרוחב) */
+        .character-img { 
+            width: 85%; 
+            max-height: 40%; /* שומר על יחס גובה תקין */
+            object-fit: contain;
+            pointer-events: none; 
+            -webkit-user-drag: none; 
+            margin-bottom: 5px; 
+        }
+
+        /* התאמות למסכים קטנים מאוד/מצב שוכב */
+        @media (max-height: 500px) {
+            #piano-container { height: 90vh; }
+            .white-key { width: 50px; }
+            .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
+            .character-img { max-height: 35%; }
+        }
+
+        @media (max-width: 768px) and (orientation: portrait) {
+            .white-key { width: 48px; }
+            .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
+        }
     </style>
 </head>
 <body>
 
 <div id="start-screen"><h1>לחצי כאן להפעלה 🎹</h1></div>
 
-<div id="piano-container">
-    <div class="piano" id="piano"></div>
+<div id="piano-scroll-wrapper">
+    <div id="piano-container">
+        <div class="piano" id="piano" oncontextmenu="return false;"></div>
+    </div>
 </div>
 
 <script>
     const startScreen = document.getElementById('start-screen');
+    let isMouseDown = false; // משתנה למעקב אחרי גרירת עכבר
+
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
     });
 
-    // שימי לב: השמות כאן חייבים להיות בדיוק כמו בגיטהאב (כולל סיומת PNG)
+    // זיהוי מצב לחיצה גלובלי לעכבר
+    document.body.onmousedown = () => { isMouseDown = true; };
+    document.body.onmouseup = () => { isMouseDown = false; };
+
     const characterImages = [
         "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png",
         "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"
@@ -68,14 +133,13 @@
                 const imgName = characterImages[whiteKeyIndex];
                 img.src = imgName;
                 img.className = 'character-img';
-                // בדיקה אם התמונה נכשלה בטעינה
+                img.draggable = false; // מניעת גרירה של התמונה
                 img.onerror = () => console.error("לא נמצאה תמונה בשם: " + imgName);
                 key.appendChild(img);
                 whiteKeyIndex++;
             }
 
-            const play = (e) => {
-                if (e) e.preventDefault();
+            const play = () => {
                 key.classList.add('active');
                 sampler.triggerAttack(fullNote);
             };
@@ -84,19 +148,29 @@
                 sampler.triggerRelease(fullNote);
             };
 
-            key.onmousedown = play; key.onmouseup = stop; key.onmouseleave = stop;
-            key.ontouchstart = play; key.ontouchend = stop;
+            // אירועי עכבר - תמיכה בנגינה רציפה
+            key.onmousedown = (e) => { e.preventDefault(); play(); };
+            key.onmouseup = stop;
+            key.onmouseleave = stop;
+            key.onmouseenter = () => { if (isMouseDown) play(); };
+
+            // אירועי מגע
+            key.ontouchstart = (e) => { e.preventDefault(); play(); };
+            key.ontouchend = (e) => { e.preventDefault(); stop(); };
+
             pianoElement.appendChild(key);
         });
     });
 
+    // נגינה רציפה בהחלקה במובייל
     document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         const el = document.elementFromPoint(touch.clientX, touch.clientY);
         if (el && el.classList.contains('key') && !el.classList.contains('active')) {
-            sampler.triggerAttack(el.dataset.note);
+            const note = el.dataset.note;
+            sampler.triggerAttack(note);
             el.classList.add('active');
-            setTimeout(() => el.classList.remove('active'), 400);
+            setTimeout(() => el.classList.remove('active'), 350);
         }
     }, { passive: false });
 </script>

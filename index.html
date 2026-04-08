@@ -3,81 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>פסנתר דיגיטלי</title>
+    <title>הפסנתר שלי</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #222;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #222;
+            user-select: none; -webkit-user-select: none; touch-action: none;
         }
 
         #piano-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            width: 100%;
-            height: 80vh;
-            padding-top: 5vh;
+            display: flex; justify-content: center; align-items: flex-start;
+            width: 100%; height: 85vh; padding-top: 5vh;
         }
 
-        .piano {
-            display: flex;
-            position: relative;
-            direction: ltr; /* מבטיח שהסדר יהיה משמאל לימין */
-            height: 100%;
-        }
+        .piano { display: flex; position: relative; direction: ltr; height: 100%; }
 
         .key {
-            position: relative;
-            border: 1px solid #000;
-            box-sizing: border-box;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding-bottom: 20px;
+            position: relative; border: 1px solid #000; box-sizing: border-box;
+            cursor: pointer; display: flex; flex-direction: column;
+            justify-content: flex-end; align-items: center; padding-bottom: 15px;
         }
 
         .white-key {
-            width: 60px;
-            height: 100%;
-            background-color: white;
-            z-index: 1;
-            border-radius: 0 0 5px 5px;
+            width: 70px; height: 100%; background-color: white;
+            z-index: 1; border-radius: 0 0 8px 8px;
         }
 
         .black-key {
-            width: 40px;
-            height: 60%;
-            background-color: black;
-            z-index: 2;
-            margin-left: -20px;
-            margin-right: -20px;
-            border-radius: 0 0 3px 3px;
+            width: 45px; height: 60%; background-color: black;
+            z-index: 2; margin-left: -22.5px; margin-right: -22.5px;
+            border-radius: 0 0 5px 5px;
         }
 
-        .key.active {
-            background-color: #ffeb3b !important; /* צהוב כשלחוץ */
-        }
+        .key.active { background-color: #ffeb3b !important; }
 
         .character-img {
-            width: 85%;
-            pointer-events: none;
-            -webkit-user-drag: none;
-            margin-bottom: 10px;
+            width: 90%; pointer-events: none; -webkit-user-drag: none;
+            margin-bottom: 5px; border-radius: 4px;
         }
 
         @media (max-width: 768px) {
-            .white-key { width: 45px; }
-            .black-key { width: 30px; margin-left: -15px; margin-right: -15px; }
+            .white-key { width: 50px; }
+            .black-key { width: 34px; margin-left: -17px; margin-right: -17px; }
         }
     </style>
 </head>
@@ -88,29 +56,31 @@
 </div>
 
 <script>
-    const pianoElement = document.getElementById('piano');
-    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const octaves = [3, 4]; 
-    
-    // רשימת דמויות (הוסיפי כאן את הקישורים שלך)
-    const characters = [
-        "https://via.placeholder.com/50?text=C3", // דו 3
-        "https://via.placeholder.com/50?text=D3", // רה 3
-        "https://via.placeholder.com/50?text=E3", // מי 3
-        "https://via.placeholder.com/50?text=F3", // פה 3
-        "https://via.placeholder.com/50?text=G3", // סול 3
-        "https://via.placeholder.com/50?text=A3", // לה 3
-        "https://via.placeholder.com/50?text=B3", // סי 3
-        "https://via.placeholder.com/50?text=C4", // דו 4
-        "https://via.placeholder.com/50?text=D4", // רה 4
-        "https://via.placeholder.com/50?text=E4", // מי 4
-        "https://via.placeholder.com/50?text=F4", // פה 4
-        "https://via.placeholder.com/50?text=G4", // סול 4
-        "https://via.placeholder.com/50?text=A4", // לה 4
-        "https://via.placeholder.com/50?text=B4"  // סי 4
+    // הגדרת נתיבי התמונות (תיקיית new)
+    const characterImages = [
+        "new/דו.jpg", "new/רה.jpg", "new/מי.jpg", "new/פה.jpg", 
+        "new/סול.jpg", "new/לה.jpg", "new/סי.jpg", // אוקטבה 3
+        "new/דו.jpg", "new/רה.jpg", "new/מי.jpg", "new/פה.jpg", 
+        "new/סול.jpg", "new/לה.jpg", "new/סי.jpg"  // אוקטבה 4
     ];
 
-    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    // הגדרת הדגימות מהתיקייה sounds (פורמט wav)
+    const sampler = new Tone.Sampler({
+        urls: {
+            "C3": "sounds/c3.wav", "C#3": "sounds/cd3.wav", "D3": "sounds/d3.wav", "D#3": "sounds/dd3.wav",
+            "E3": "sounds/e3.wav", "F3": "sounds/f3.wav", "F#3": "sounds/fs3.wav", "G3": "sounds/g3.wav",
+            "G#3": "sounds/gs3.wav", "A3": "sounds/a3.wav", "A#3": "sounds/ad3.wav", "B3": "sounds/b3.wav",
+            "C4": "sounds/c4.wav", "C#4": "sounds/cd4.wav", "D4": "sounds/d4.wav", "D#4": "sounds/dd4.wav",
+            "E4": "sounds/e4.wav", "F4": "sounds/f4.wav", "F#4": "sounds/fs4.wav", "G4": "sounds/g4.wav",
+            "G#4": "sounds/gs4.wav", "A4": "sounds/a4.wav", "A#4": "sounds/ad4.wav", "B4": "sounds/b4.wav"
+        },
+        baseUrl: "./",
+        onload: () => { console.log("כל הצלילים נטענו בהצלחה!"); }
+    }).toDestination();
+
+    const pianoElement = document.getElementById('piano');
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const octaves = [3, 4];
     let whiteKeyIndex = 0;
 
     octaves.forEach(octave => {
@@ -122,65 +92,53 @@
             key.dataset.note = fullNote;
 
             if (!isBlack) {
-                if (characters[whiteKeyIndex]) {
-                    const img = document.createElement('img');
-                    img.src = characters[whiteKeyIndex];
-                    img.className = 'character-img';
-                    img.oncontextmenu = (e) => e.preventDefault();
-                    key.appendChild(img);
-                }
+                const img = document.createElement('img');
+                img.src = characterImages[whiteKeyIndex] || "";
+                img.className = 'character-img';
+                img.oncontextmenu = (e) => e.preventDefault();
+                key.appendChild(img);
                 whiteKeyIndex++;
             }
 
-            // פונקציות לחיצה
-            const startHandler = (e) => {
-                e.preventDefault();
-                playNote(fullNote, key);
-            };
-            const endHandler = (e) => {
-                e.preventDefault();
-                stopNote(fullNote, key);
+            // פונקציות נגינה
+            const play = (e) => {
+                if (e.type === 'touchstart') e.preventDefault();
+                if (Tone.context.state !== 'running') Tone.start();
+                sampler.triggerAttack(fullNote);
+                key.classList.add('active');
             };
 
-            key.addEventListener('touchstart', startHandler);
-            key.addEventListener('touchend', endHandler);
-            key.addEventListener('mousedown', startHandler);
-            key.addEventListener('mouseup', endHandler);
-            key.addEventListener('mouseleave', endHandler);
+            const stop = (e) => {
+                sampler.triggerRelease(fullNote);
+                key.classList.remove('active');
+            };
+
+            key.addEventListener('mousedown', play);
+            key.addEventListener('mouseup', stop);
+            key.addEventListener('mouseleave', stop);
+            key.addEventListener('touchstart', play);
+            key.addEventListener('touchend', stop);
             
-            // גרירה מעל הקלידים
-            key.addEventListener('mouseenter', (e) => {
-                if (e.buttons === 1) playNote(fullNote, key);
-            });
+            // תמיכה בהחלקה
+            key.addEventListener('mouseenter', (e) => { if (e.buttons === 1) play(e); });
 
             pianoElement.appendChild(key);
         });
     });
 
-    function playNote(note, element) {
-        if (Tone.context.state !== 'running') Tone.start();
-        synth.triggerAttack(note);
-        element.classList.add('active');
-    }
-
-    function stopNote(note, element) {
-        synth.triggerRelease(note);
-        element.classList.remove('active');
-    }
-
-    // מניעת גלילה וזום במובייל
+    // מניעת גלילה ותמיכה בנגינה רציפה במובייל
     document.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 1) e.preventDefault(); // מניעת זום עם שתי אצבעות
-        
         const touch = e.touches[0];
         const el = document.elementFromPoint(touch.clientX, touch.clientY);
         if (el && el.classList.contains('key') && !el.classList.contains('active')) {
-            playNote(el.dataset.note, el);
+            const note = el.dataset.note;
+            sampler.triggerAttack(note);
+            el.classList.add('active');
+            // כיבוי אוטומטי של הקליד אחרי חצי שנייה בהחלקה
+            setTimeout(() => el.classList.remove('active'), 500);
         }
     }, { passive: false });
 
-    window.oncontextmenu = (e) => e.preventDefault();
 </script>
-
 </body>
 </html>

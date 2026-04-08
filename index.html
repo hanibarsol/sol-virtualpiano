@@ -40,13 +40,13 @@
 
         .piano { display: flex; position: relative; direction: ltr; height: 100%; flex-grow: 1; }
         
-     .key { 
+    .key { 
             position: relative; border: 1px solid #000; box-sizing: border-box; 
             cursor: pointer; display: flex; flex-direction: column; 
-            justify-content: flex-start; /* שינוי ל-flex-start כדי שהדמויות יהיו למעלה */
-            align-items: center; padding-top: 20px; /* רווח קטן מהקצה העליון */
-            transition: background-color 0.05s;
-        
+            justify-content: flex-end; /* דוחף הכל לתחתית */
+            align-items: center; 
+            padding-bottom: 20px; /* המרחק של הדמות מהקצה התחתון */
+            padding-top: 0; /* בטלי את ה-250 */
         }
 
         /* הגדלת הקלידים מעט כדי שימלאו את המסך */
@@ -60,14 +60,15 @@
 
         .key.active { background-color: #ffeb3b !important; }
 
-        .character-img { 
-            width: 92%; /* הגדלת הדמות */
-            max-height: 50%; /* מאפשר לה להיות גדולה יותר */
+       .character-img { 
+            width: 90%; 
+            height: auto; /* מאפשר לתמונה לשמור על הפרופורציות שלה */
+            max-height: 55%; /* כאן את קובעת כמה גדולה היא תהיה. תגדילי ל-60% אם את רוצה עוד יותר גדול */
             object-fit: contain;
             pointer-events: none; 
             -webkit-user-drag: none; 
+            margin-bottom: 5px; 
         }
-
         @media (max-height: 500px) {
             .character-img { max-height: 40%; }
             .key { padding-top: 220px; }
@@ -130,12 +131,18 @@
             key.className = `key ${isBlack ? 'black-key' : 'white-key'}`;
             key.dataset.note = fullNote;
 
-            if (!isBlack) {
+           if (!isBlack) {
+                // יצירת שטח ריק שדוחף את הדמות למטה בלי להקטין אותה
+                const spacer = document.createElement('div');
+                spacer.style.flexGrow = "1"; // זה אומר לרווח לתפוס את כל השטח הפנוי למעלה
+                key.appendChild(spacer);
+
                 const img = document.createElement('img');
                 const imgName = characterImages[whiteKeyIndex];
                 img.src = imgName;
                 img.className = 'character-img';
                 img.draggable = false;
+                img.onerror = () => console.error("לא נמצאה תמונה בשם: " + imgName);
                 key.appendChild(img);
                 whiteKeyIndex++;
             }

@@ -1,12 +1,110 @@
-// הגדרת שמות התמונות (כשהן באותה תיקייה עם ה-index.html)
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>הפסנתר הוירטואלי שלי</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        /* הגדרות בסיסיות למניעת גלילה וזום */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none; /* קריטי למניעת זום והחלקת דף */
+        }
+
+        #piano-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            height: 90vh;
+            padding-top: 20px;
+        }
+
+        .piano {
+            display: flex;
+            position: relative;
+            direction: ltr; /* תמיד משמאל לימין (נמוך לגבוה) */
+            height: 100%;
+        }
+
+        .key {
+            position: relative;
+            border: 1px solid #000;
+            box-sizing: border-box;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 15px;
+            transition: background-color 0.05s;
+        }
+
+        /* קלידים לבנים */
+        .white-key {
+            width: 65px;
+            height: 100%;
+            background-color: white;
+            z-index: 1;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* קלידים שחורים */
+        .black-key {
+            width: 40px;
+            height: 60%;
+            background-color: #333;
+            z-index: 2;
+            margin-left: -20px;
+            margin-right: -20px;
+            border-radius: 0 0 5px 5px;
+        }
+
+        /* מצב לחוץ - צהוב */
+        .key.active {
+            background-color: #ffeb3b !important;
+        }
+
+        /* הגדרות דמויות */
+        .character-img {
+            width: 85%;
+            pointer-events: none; /* מניעת גרירה/שמירה */
+            -webkit-user-drag: none;
+            margin-bottom: 5px;
+            /* הגנה נוספת מפני שמירה */
+            user-select: none;
+        }
+
+        /* התאמה למובייל וטאבלטים */
+        @media (max-width: 768px) {
+            .white-key { width: 48px; }
+            .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="piano-container">
+    <div class="piano" id="piano"></div>
+</div>
+
+<script>
+    // 1. רשימת התמונות שלך (לפי הסדר: דו רה מי פה סול לה סי)
+    // אם שינית שמות לקבצים ב-GitHub, עדכני כאן
     const characterImages = [
-        "דו.jpg", "רה.jpg", "מי.jpg", "פה.jpg", 
-        "סול.jpg", "לה.jpg", "סי.jpg", // אוקטבה 3
-        "דו.jpg", "רה.jpg", "מי.jpg", "פה.jpg", 
-        "סול.jpg", "לה.jpg", "סי.jpg"  // אוקטבה 4
+        "דו.jpg", "רה.jpg", "מי.jpg", "פה.jpg", "סול.jpg", "לה.jpg", "סי.jpg", // אוקטבה 3
+        "דו.jpg", "רה.jpg", "מי.jpg", "פה.jpg", "סול.jpg", "לה.jpg", "סי.jpg"  // אוקטבה 4
     ];
 
-    // הגדרת הצלילים (כשהם באותה תיקייה עם ה-index.html)
+    // 2. הגדרת הסאמפלר - טוען את קבצי ה-WAV שלך מהתיקייה
     const sampler = new Tone.Sampler({
         urls: {
             "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav",
@@ -16,6 +114,91 @@
             "E4": "e4.wav", "F4": "f4.wav", "F#4": "fs4.wav", "G4": "g4.wav",
             "G#4": "gs4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
         },
-        baseUrl: "./", // מחפש בתיקייה הנוכחית
-        onload: () => { console.log("הצלילים נטענו!"); }
+        baseUrl: "./", // הקבצים נמצאים באותה תיקייה של ה-index
+        onload: () => { console.log("המקלדת מוכנה לנגינה!"); }
     }).toDestination();
+
+    const pianoElement = document.getElementById('piano');
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const octaves = [3, 4];
+    let whiteKeyIndex = 0;
+
+    // יצירת הקלידים
+    octaves.forEach(octave => {
+        notes.forEach(note => {
+            const isBlack = note.includes('#');
+            const fullNote = note + octave;
+            
+            const key = document.createElement('div');
+            key.className = `key ${isBlack ? 'black-key' : 'white-key'}`;
+            key.dataset.note = fullNote;
+
+            // הוספת דמות לקליד לבן
+            if (!isBlack) {
+                if (characterImages[whiteKeyIndex]) {
+                    const img = document.createElement('img');
+                    img.src = characterImages[whiteKeyIndex];
+                    img.className = 'character-img';
+                    img.oncontextmenu = (e) => e.preventDefault(); // מניעת תפריט שמירה
+                    key.appendChild(img);
+                }
+                whiteKeyIndex++;
+            }
+
+            // פונקציות הפעלת צליל
+            const startNote = (e) => {
+                if (e.type === 'touchstart') e.preventDefault();
+                if (Tone.context.state !== 'running') Tone.start();
+                
+                sampler.triggerAttack(fullNote);
+                key.classList.add('active');
+            };
+
+            const endNote = () => {
+                sampler.triggerRelease(fullNote);
+                key.classList.remove('active');
+            };
+
+            // אירועי עכבר
+            key.addEventListener('mousedown', startNote);
+            key.addEventListener('mouseup', endNote);
+            key.addEventListener('mouseleave', endNote);
+            
+            // אירועי מגע (Multi-touch)
+            key.addEventListener('touchstart', startNote);
+            key.addEventListener('touchend', endNote);
+
+            // תמיכה בנגינה רציפה (החלקה מעל קלידים עם עכבר לחוץ)
+            key.addEventListener('mouseenter', (e) => {
+                if (e.buttons === 1) startNote(e);
+            });
+
+            pianoElement.appendChild(key);
+        });
+    });
+
+    // תמיכה בהחלקה במובייל (Slide to play)
+    document.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        
+        if (el && el.classList.contains('key')) {
+            const note = el.dataset.note;
+            if (!el.classList.contains('active')) {
+                sampler.triggerAttack(note);
+                el.classList.add('active');
+                // שחרור אוטומטי של הצבע אחרי זמן קצר בהחלקה
+                setTimeout(() => el.classList.remove('active'), 400);
+            }
+        }
+    }, { passive: false });
+
+    // חסימה גורפת של תפריט ימני באתר כולו למניעת שמירת תמונות
+    window.oncontextmenu = (e) => {
+        e.preventDefault();
+        return false;
+    };
+</script>
+
+</body>
+</html>

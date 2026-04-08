@@ -40,18 +40,13 @@
 
         .piano { display: flex; position: relative; direction: ltr; height: 100%; flex-grow: 1; }
         
-        .key { 
-    position: relative; 
-    border: 1px solid #000; 
-    box-sizing: border-box; 
-    cursor: pointer; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: flex-end; /* זה יוריד את הדמות למטה */
-    align-items: center; 
-    padding-bottom: 20px; /* זה יקבע כמה הדמות רחוקה מהקצה התחתון של הקליד */
-    padding-top: 0; /* ביטול ה-250 שחנק את התמונה */
-}
+     .key { 
+            position: relative; border: 1px solid #000; box-sizing: border-box; 
+            cursor: pointer; display: flex; flex-direction: column; 
+            justify-content: flex-start; /* שינוי ל-flex-start כדי שהדמויות יהיו למעלה */
+            align-items: center; padding-top: 20px; /* רווח קטן מהקצה העליון */
+            transition: background-color 0.05s;
+        
         }
 
         /* הגדלת הקלידים מעט כדי שימלאו את המסך */

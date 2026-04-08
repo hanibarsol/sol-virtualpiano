@@ -47,19 +47,19 @@
 
     // 1. הגדרת התמונות (נמצאות בתיקייה הראשית לפי התמונה שלך)
     const characterImages = [
-        "דו.jpg", "רה.jpg", "מי.jpg", "פה.jpg", "סול.jpg", "לה.jpg", "סי.jpg",
-        "דו.jpg", "רה.jpg", "מי.jpg", "פה.jpg", "סול.jpg", "לה.jpg", "סי.jpg"
+        "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png",
+        "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"
     ];
 
     // 2. הגדרת הסאונד (מפנה לתיקיית sounds)
     const sampler = new Tone.Sampler({
         urls: {
             "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav",
-            "E3": "e3.wav", "F3": "f3.wav", "F#3": "fs3.wav", "G3": "g3.wav",
-            "G#3": "gs3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
+            "E3": "e3.wav", "F3": "f3.wav", "F#3": "fd3.wav", "G3": "g3.wav",
+            "G#3": "gd3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
             "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav",
-            "E4": "e4.wav", "F4": "f4.wav", "F#4": "fs4.wav", "G4": "g4.wav",
-            "G#4": "gs4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
+            "E4": "e4.wav", "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav",
+            "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
         },
         baseUrl: "sounds/", // כאן הגדרתי שכל הסאונד מגיע מתיקיית sounds
         onload: () => console.log("כל הצלילים נטענו!")

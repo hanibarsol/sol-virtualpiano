@@ -2,8 +2,8 @@
 <html lang="he">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>פסנתר דמויות משופר</title>
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>הפסנתר הוירטואלי של סול</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body, html { 
@@ -84,7 +84,7 @@
 </head>
 <body>
 
-<div id="start-screen"><h1>לחצי כאן להפעלה 🎹</h1></div>
+<div id="start-screen"><h1>לחצו כאן להפעלה 🎹</h1></div>
 
 <div id="piano-scroll-wrapper">
     <div id="piano-container">
@@ -112,6 +112,10 @@
         "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"
     ];
 
+   // הגדרת לייטנסי נמוך במיוחד
+    Tone.context.latencyHint = 'fastest';
+    Tone.context.lookAhead = 0;
+
     const sampler = new Tone.Sampler({
         urls: {
             "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
@@ -120,10 +124,10 @@
             "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
         },
         baseUrl: "sounds/",
-        // שיפור הסאונד שיישאר מעט אחרי הלחיצה
-        release: 2, 
-        onload: () => console.log("Piano Ready!")
+        release: 1, 
+        onload: () => console.log("כל הצלילים נטענו!")
     }).toDestination();
+        
 
     const pianoElement = document.getElementById('piano');
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];

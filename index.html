@@ -45,7 +45,7 @@
             cursor: pointer; display: flex; flex-direction: column; 
             justify-content: flex-end; /* דוחף הכל לתחתית */
             align-items: center; 
-            padding-bottom: 50px; /* המרחק של הדמות מהקצה התחתון */
+            padding-bottom: 40px; /* המרחק של הדמות מהקצה התחתון */
             padding-top: 0; /* בטלי את ה-250 */
         }
 
@@ -53,26 +53,33 @@
         .white-key { width: 7.14vw; min-width: 50px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 8px 8px; }
         .black-key { width: 4.5vw; min-width: 32px; height: 60%; background-color: #333; z-index: 2; margin-left: -2.25vw; margin-right: -2.25vw; border-radius: 0 0 5px 5px; }
         
-        @media (max-width: 600px) {
-            .white-key { width: 60px; }
-            .black-key { width: 38px; margin-left: -19px; margin-right: -19px; }
-        }
+      /* התאמות למסכים קטנים/שוכבים */
+@media (max-height: 500px) {
+    #piano-container { height: 90vh; }
+    .white-key { width: 50px; }
+    .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
+    /* כאן אנחנו מוודאים שהתמונה עדיין נראית טוב גם כשהמסך נמוך */
+    .character-img { max-height: 45%; } 
+}
+
+/* התאמה לטלפונים במצב עומד */
+@media (max-width: 768px) and (orientation: portrait) {
+    .white-key { width: 48px; }
+    .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
+}
 
         .key.active { background-color: #ffeb3b !important; }
 
        .character-img { 
             width: 90%; 
             height: auto; /* מאפשר לתמונה לשמור על הפרופורציות שלה */
-            max-height: 65%; /* כאן את קובעת כמה גדולה היא תהיה. תגדילי ל-60% אם את רוצה עוד יותר גדול */
+            max-height: 60%; /* כאן את קובעת כמה גדולה היא תהיה. תגדילי ל-60% אם את רוצה עוד יותר גדול */
             object-fit: contain;
             pointer-events: none; 
             -webkit-user-drag: none; 
             margin-bottom: 5px; 
         }
-        @media (max-height: 500px) {
-            .character-img { max-height: 40%; }
-            .key { padding-top: 220px; }
-        }
+        
     </style>
 </head>
 <body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>פסנתר דמויות - גרסה יציבה</title>
+    <title>פסנתר דמויות - תיקון קלידים שחורים</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body, html { 
@@ -26,19 +26,15 @@
             overflow-y: hidden;
             display: flex;
             align-items: center;
-            background-color: #1a1a1a;
             -webkit-overflow-scrolling: touch;
         }
 
         #piano-container { 
             display: flex; 
-            /* החישוב הזה מוודא שהפסנתר תמיד ימלא לפחות את כל רוחב המסך */
             width: 100%; 
             min-width: 100vw; 
             height: 90vh; 
-            padding: 0;
-            margin: 0;
-            position: relative;
+            position: relative; /* חשוב למיקום הקלידים השחורים */
         }
 
         .piano { 
@@ -59,23 +55,26 @@
             justify-content: flex-end; 
             align-items: center; 
             padding-bottom: 25px;
-            flex: 1 0 0; /* גורם לכל הקלידים להתחלק שווה ברוחב בלי רווחים */
+            flex: 1 0 0; 
             background-color: white;
             z-index: 1;
             border-radius: 0 0 8px 8px;
-            min-width: 60px; /* רוחב מינימלי למניעת קריסה במובייל */
+            min-width: 60px;
+            /* חשוב: מאפשר לקליד השחור לחרוג מגבולות הקליד הלבן */
+            overflow: visible; 
         }
 
         .black-key { 
             position: absolute;
-            width: 36px; 
+            width: 34px; 
             height: 60%; 
             background-color: #333; 
             z-index: 10; 
-            /* המיקום מחושב לפי הקליד הלבן */
-            right: -18px; 
+            /* מיקום הקליד בדיוק בין שני קלידים לבנים */
+            right: -17px; 
             border-radius: 0 0 5px 5px;
             top: 0;
+            border: 1px solid #000;
         }
 
         .key.active { background-color: #ffeb3b !important; }
@@ -92,15 +91,9 @@
 
         .spacer { flex-grow: 1; width: 100%; }
 
-        /* התאמות למובייל/טאבלט */
         @media (max-width: 800px) {
             .key { min-width: 50px; }
-            .black-key { width: 30px; right: -15px; }
-        }
-
-        @media (max-height: 500px) {
-            .key { padding-bottom: 10px; }
-            .character-img { max-height: 40%; }
+            .black-key { width: 28px; right: -14px; }
         }
     </style>
 </head>
@@ -119,7 +112,6 @@
     const pianoElement = document.getElementById('piano');
     let isMouseDown = false;
 
-    // הגדרות מהירות סאונד
     Tone.context.latencyHint = 'fastest';
     Tone.context.lookAhead = 0;
 
@@ -131,21 +123,15 @@
     document.body.onmousedown = () => { isMouseDown = true; };
     document.body.onmouseup = () => { isMouseDown = false; };
 
-    const characterImages = [
-        "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png",
-        "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"
-    ];
+    const characterImages = ["דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png", "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"];
 
     const sampler = new Tone.Sampler({
         urls: {
-            "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
-            "F3": "f3.wav", "F#3": "fd3.wav", "G3": "g3.wav", "G#3": "gd3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
-            "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav", "E4": "e4.wav",
-            "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
+            "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav", "F3": "f3.wav", "F#3": "fd3.wav", "G3": "g3.wav", "G#3": "gd3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
+            "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav", "E4": "e4.wav", "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
         },
         baseUrl: "sounds/",
-        release: 1.5,
-        onload: () => console.log("Piano Loaded")
+        release: 1.5
     }).toDestination();
 
     const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -159,7 +145,6 @@
             key.className = 'key';
             key.dataset.note = fullNote;
 
-            // הוספת ספייסר ודמות
             const spacer = document.createElement('div');
             spacer.className = 'spacer';
             key.appendChild(spacer);
@@ -170,47 +155,37 @@
             img.draggable = false;
             key.appendChild(img);
 
-            // יצירת קליד שחור
             if (note !== 'E' && note !== 'B') {
                 const blackKey = document.createElement('div');
                 blackKey.className = 'black-key';
                 const blackNote = note + '#' + octave;
                 blackKey.dataset.note = blackNote;
                 
-                // אירועי מגע לקליד שחור
-                const playBlack = (e) => { e.stopPropagation(); play(blackNote, blackKey); };
-                const stopBlack = (e) => { e.stopPropagation(); stop(blackNote, blackKey); };
-                
-                blackKey.onmousedown = playBlack;
-                blackKey.onmouseup = stopBlack;
-                blackKey.ontouchstart = playBlack;
-                blackKey.ontouchend = stopBlack;
+                const playB = (e) => { e.stopPropagation(); play(blackNote, blackKey); };
+                const stopB = (e) => { e.stopPropagation(); stop(blackNote, blackKey); };
+                blackKey.onmousedown = playB;
+                blackKey.onmouseup = stopB;
+                blackKey.ontouchstart = playB;
+                blackKey.ontouchend = stopB;
                 
                 key.appendChild(blackKey);
             }
 
-            const play = (n, el) => {
-                el.classList.add('active');
-                sampler.triggerAttack(n);
-            };
-            const stop = (n, el) => {
-                el.classList.remove('active');
-                sampler.triggerRelease(n);
-            };
+            const play = (n, el) => { el.classList.add('active'); sampler.triggerAttack(n); };
+            const stop = (n, el) => { el.classList.remove('active'); sampler.triggerRelease(n); };
 
-            key.onmousedown = (e) => { e.preventDefault(); play(fullNote, key); };
+            key.onmousedown = (e) => { if(e.target === key || e.target.tagName === 'IMG') { e.preventDefault(); play(fullNote, key); } };
             key.onmouseup = () => stop(fullNote, key);
             key.onmouseleave = () => stop(fullNote, key);
             key.onmouseenter = () => { if (isMouseDown) play(fullNote, key); };
-            key.ontouchstart = (e) => { e.preventDefault(); play(fullNote, key); };
-            key.ontouchend = (e) => { e.preventDefault(); stop(fullNote, key); };
+            key.ontouchstart = (e) => { if(e.target === key || e.target.tagName === 'IMG') { e.preventDefault(); play(fullNote, key); } };
+            key.ontouchend = () => stop(fullNote, key);
 
             pianoElement.appendChild(key);
             whiteKeyIndex++;
         });
     });
 
-    // גרירה במובייל
     document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         const el = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -218,8 +193,3 @@
             sampler.triggerAttack(el.dataset.note);
             el.classList.add('active');
             setTimeout(() => el.classList.remove('active'), 300);
-        }
-    }, { passive: false });
-</script>
-</body>
-</html>

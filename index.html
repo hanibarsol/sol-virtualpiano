@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>פסנתר דמויות - תיקון קלידים שחורים</title>
+    <title>הפסנתר הוירטואלי של סול</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body, html { 
@@ -15,7 +15,7 @@
         #start-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.95); color: white; display: flex; 
-            justify-content: center; align-items: center; z-index: 1000; 
+            justify-content: center; align-items: center; z-index: 9999; 
             cursor: pointer; text-align: center; 
         }
 
@@ -33,8 +33,8 @@
             display: flex; 
             width: 100%; 
             min-width: 100vw; 
-            height: 90vh; 
-            position: relative; /* חשוב למיקום הקלידים השחורים */
+            height: 85vh; 
+            position: relative;
         }
 
         .piano { 
@@ -60,18 +60,16 @@
             z-index: 1;
             border-radius: 0 0 8px 8px;
             min-width: 60px;
-            /* חשוב: מאפשר לקליד השחור לחרוג מגבולות הקליד הלבן */
-            overflow: visible; 
+            overflow: visible; /* מאפשר לקלידים השחורים לצוף החוצה */
         }
 
         .black-key { 
             position: absolute;
             width: 34px; 
-            height: 60%; 
+            height: 55%; 
             background-color: #333; 
             z-index: 10; 
-            /* מיקום הקליד בדיוק בין שני קלידים לבנים */
-            right: -17px; 
+            right: -17px; /* מיקום על התפר */
             border-radius: 0 0 5px 5px;
             top: 0;
             border: 1px solid #000;
@@ -99,11 +97,13 @@
 </head>
 <body>
 
-<div id="start-screen"><h1>לחצי כאן להפעלה 🎹</h1></div>
+<div id="start-screen" onclick="startPiano()">
+    <h1>לחצו כאן להפעלה 🎹</h1>
+</div>
 
 <div id="piano-scroll-wrapper">
     <div id="piano-container">
-        <div class="piano" id="piano" oncontextmenu="return false;"></div>
+        <div class="piano" id="piano"></div>
     </div>
 </div>
 
@@ -112,13 +112,20 @@
     const pianoElement = document.getElementById('piano');
     let isMouseDown = false;
 
+    // פונקציית ההפעלה
+    async function startPiano() {
+        try {
+            await Tone.start();
+            console.log("Audio Context Started");
+            startScreen.style.display = 'none';
+        } catch (e) {
+            console.error("Failed to start audio:", e);
+        }
+    }
+
+    // הגדרות לייטנסי
     Tone.context.latencyHint = 'fastest';
     Tone.context.lookAhead = 0;
-
-    startScreen.addEventListener('click', async () => {
-        await Tone.start();
-        startScreen.style.display = 'none';
-    });
 
     document.body.onmousedown = () => { isMouseDown = true; };
     document.body.onmouseup = () => { isMouseDown = false; };
@@ -128,68 +135,4 @@
     const sampler = new Tone.Sampler({
         urls: {
             "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav", "F3": "f3.wav", "F#3": "fd3.wav", "G3": "g3.wav", "G#3": "gd3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
-            "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav", "E4": "e4.wav", "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
-        },
-        baseUrl: "sounds/",
-        release: 1.5
-    }).toDestination();
-
-    const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-    const octaves = [3, 4];
-    let whiteKeyIndex = 0;
-
-    octaves.forEach(octave => {
-        notes.forEach(note => {
-            const fullNote = note + octave;
-            const key = document.createElement('div');
-            key.className = 'key';
-            key.dataset.note = fullNote;
-
-            const spacer = document.createElement('div');
-            spacer.className = 'spacer';
-            key.appendChild(spacer);
-
-            const img = document.createElement('img');
-            img.src = characterImages[whiteKeyIndex];
-            img.className = 'character-img';
-            img.draggable = false;
-            key.appendChild(img);
-
-            if (note !== 'E' && note !== 'B') {
-                const blackKey = document.createElement('div');
-                blackKey.className = 'black-key';
-                const blackNote = note + '#' + octave;
-                blackKey.dataset.note = blackNote;
-                
-                const playB = (e) => { e.stopPropagation(); play(blackNote, blackKey); };
-                const stopB = (e) => { e.stopPropagation(); stop(blackNote, blackKey); };
-                blackKey.onmousedown = playB;
-                blackKey.onmouseup = stopB;
-                blackKey.ontouchstart = playB;
-                blackKey.ontouchend = stopB;
-                
-                key.appendChild(blackKey);
-            }
-
-            const play = (n, el) => { el.classList.add('active'); sampler.triggerAttack(n); };
-            const stop = (n, el) => { el.classList.remove('active'); sampler.triggerRelease(n); };
-
-            key.onmousedown = (e) => { if(e.target === key || e.target.tagName === 'IMG') { e.preventDefault(); play(fullNote, key); } };
-            key.onmouseup = () => stop(fullNote, key);
-            key.onmouseleave = () => stop(fullNote, key);
-            key.onmouseenter = () => { if (isMouseDown) play(fullNote, key); };
-            key.ontouchstart = (e) => { if(e.target === key || e.target.tagName === 'IMG') { e.preventDefault(); play(fullNote, key); } };
-            key.ontouchend = () => stop(fullNote, key);
-
-            pianoElement.appendChild(key);
-            whiteKeyIndex++;
-        });
-    });
-
-    document.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        const el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (el && el.dataset.note && !el.classList.contains('active')) {
-            sampler.triggerAttack(el.dataset.note);
-            el.classList.add('active');
-            setTimeout(() => el.classList.remove('active'), 300);
+            "C4": "c4.wav", "C#4

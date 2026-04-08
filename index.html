@@ -1,260 +1,186 @@
 <!DOCTYPE html>
 <html lang="he">
 <head>
-  <meta charset="UTF-8">
-  <!-- ביטול זום כולל (pinch + double-tap) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>הפסנתר של סול 🎹</title>
-  <style>
-    body {
-      background: #f0f8ff;
-      text-align: center;
-      font-family: Arial;
-      margin: 0;
-      padding: 0;
-      touch-action: manipulation;
-      -webkit-user-select: none;
-      user-select: none;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>פסנתר דיגיטלי</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #222;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
 
-    .keyboard {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-      padding: 5px;
-      background-color: #fff;
-      border: 4px solid #000;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 95%;
-       max-height: 40vh;
-      max-width: 100vw;
-    }
+        #piano-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            height: 80vh;
+            padding-top: 5vh;
+        }
 
-    .key-wrapper {
-      position: relative;
-      flex: 1;
-    }
+        .piano {
+            display: flex;
+            position: relative;
+            direction: ltr; /* מבטיח שהסדר יהיה משמאל לימין */
+            height: 100%;
+        }
 
-    .key {
-      width: 100%;
-      aspect-ratio: 80/300;
-      background: white;
-      border: 1px solid #ccc;
-      margin: 0 1px;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-      transition: transform 0.1s, background-color 0.1s;
-      cursor: pointer;
-      position: relative;
-      z-index: 1;
-      touch-action: none;
-      user-select: none;
+        .key {
+            position: relative;
+            border: 1px solid #000;
+            box-sizing: border-box;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
+        }
 
-    }
+        .white-key {
+            width: 60px;
+            height: 100%;
+            background-color: white;
+            z-index: 1;
+            border-radius: 0 0 5px 5px;
+        }
 
-    .key img {
-      width: 100%;
-      height: auto;
-      position: absolute;
-      bottom: 7px;
-      left: 0;
-      pointer-events: none;
-    }
+        .black-key {
+            width: 40px;
+            height: 60%;
+            background-color: black;
+            z-index: 2;
+            margin-left: -20px;
+            margin-right: -20px;
+            border-radius: 0 0 3px 3px;
+        }
 
-    .key.black {
-      position: absolute;
-      top: 0;
-      left: 65%;
-      width: 60%;
-      aspect-ratio: 50/160;
-      background: black;
-      border: 1px solid #333;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-      z-index: 2;
-    }
+        .key.active {
+            background-color: #ffeb3b !important; /* צהוב כשלחוץ */
+        }
 
-    .key.black:active {
-      background-color: #CCC;
-      z-index: 2
-    }
+        .character-img {
+            width: 85%;
+            pointer-events: none;
+            -webkit-user-drag: none;
+            margin-bottom: 10px;
+        }
 
-    .key.active {
-      transform: scale(0.98);
-      background-color: #CCC;
-      z-index: 1
-    }
-  </style>
+        @media (max-width: 768px) {
+            .white-key { width: 45px; }
+            .black-key { width: 30px; margin-left: -15px; margin-right: -15px; }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- הלוגו -->
-  <img src="thelogo.png" alt="לוגו סול" 
-       style="width: 90px; max-width: 50%; height: auto; margin: 0 auto; display: block; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; pointer-events:none;">
+<div id="piano-container">
+    <div class="piano" id="piano"></div>
+</div>
 
-  <!-- הקלידים -->
-  <div class="keyboard">
-    <div class="key-wrapper">
-      <div class="key" data-note="c3"><img src="דו.png" alt=""></div>
-      <div class="key black" data-note="cd3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="d3"><img src="רה.png" alt=""></div>
-      <div class="key black" data-note="dd3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="e3"><img src="מי.png" alt=""></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="f3"><img src="פה.png" alt=""></div>
-      <div class="key black" data-note="fd3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="g3"><img src="סול.png" alt=""></div>
-      <div class="key black" data-note="gd3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="a3"><img src="לה.png" alt=""></div>
-      <div class="key black" data-note="ad3"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="b3"><img src="סי.png" alt=""></div>
-    </div>
+<script>
+    const pianoElement = document.getElementById('piano');
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const octaves = [3, 4]; 
+    
+    // רשימת דמויות (הוסיפי כאן את הקישורים שלך)
+    const characters = [
+        "https://via.placeholder.com/50?text=C3", // דו 3
+        "https://via.placeholder.com/50?text=D3", // רה 3
+        "https://via.placeholder.com/50?text=E3", // מי 3
+        "https://via.placeholder.com/50?text=F3", // פה 3
+        "https://via.placeholder.com/50?text=G3", // סול 3
+        "https://via.placeholder.com/50?text=A3", // לה 3
+        "https://via.placeholder.com/50?text=B3", // סי 3
+        "https://via.placeholder.com/50?text=C4", // דו 4
+        "https://via.placeholder.com/50?text=D4", // רה 4
+        "https://via.placeholder.com/50?text=E4", // מי 4
+        "https://via.placeholder.com/50?text=F4", // פה 4
+        "https://via.placeholder.com/50?text=G4", // סול 4
+        "https://via.placeholder.com/50?text=A4", // לה 4
+        "https://via.placeholder.com/50?text=B4"  // סי 4
+    ];
 
-    <!-- אוקטבה רביעית -->
-    <div class="key-wrapper">
-      <div class="key" data-note="c4"><img src="דו.png" alt=""></div>
-      <div class="key black" data-note="cd4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="d4"><img src="רה.png" alt=""></div>
-      <div class="key black" data-note="dd4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="e4"><img src="מי.png" alt=""></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="f4"><img src="פה.png" alt=""></div>
-      <div class="key black" data-note="fd4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="g4"><img src="סול.png" alt=""></div>
-      <div class="key black" data-note="gd4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="a4"><img src="לה.png" alt=""></div>
-      <div class="key black" data-note="ad4"></div>
-    </div>
-    <div class="key-wrapper">
-      <div class="key" data-note="b4"><img src="סי.png" alt=""></div>
-    </div>
-  </div>
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    let whiteKeyIndex = 0;
 
-  <!-- סקריפט -->
-  <script>
-    let audioCtx;
+    octaves.forEach(octave => {
+        notes.forEach(note => {
+            const isBlack = note.includes('#');
+            const fullNote = note + octave;
+            const key = document.createElement('div');
+            key.className = `key ${isBlack ? 'black-key' : 'white-key'}`;
+            key.dataset.note = fullNote;
 
-    function initAudioContext() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    }
+            if (!isBlack) {
+                if (characters[whiteKeyIndex]) {
+                    const img = document.createElement('img');
+                    img.src = characters[whiteKeyIndex];
+                    img.className = 'character-img';
+                    img.oncontextmenu = (e) => e.preventDefault();
+                    key.appendChild(img);
+                }
+                whiteKeyIndex++;
+            }
 
-    function playSound(note) {
-      initAudioContext();
-      const url = `sounds/${note}.wav`;
-      fetch(url)
-        .then(response => response.arrayBuffer())
-        .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer))
-        .then(audioBuffer => {
-          const source = audioCtx.createBufferSource();
-          source.buffer = audioBuffer;
-          source.connect(audioCtx.destination);
-          source.start(0);
-        })
-        .catch(err => console.error("שגיאה בטעינת צליל:", err));
-    }
+            // פונקציות לחיצה
+            const startHandler = (e) => {
+                e.preventDefault();
+                playNote(fullNote, key);
+            };
+            const endHandler = (e) => {
+                e.preventDefault();
+                stopNote(fullNote, key);
+            };
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const keys = document.querySelectorAll(".key, .key.black");
+            key.addEventListener('touchstart', startHandler);
+            key.addEventListener('touchend', endHandler);
+            key.addEventListener('mousedown', startHandler);
+            key.addEventListener('mouseup', endHandler);
+            key.addEventListener('mouseleave', endHandler);
+            
+            // גרירה מעל הקלידים
+            key.addEventListener('mouseenter', (e) => {
+                if (e.buttons === 1) playNote(fullNote, key);
+            });
 
-      keys.forEach(key => {
-        const note = key.getAttribute("data-note");
-        if (!note) return;
-
-        const handler = (e) => {
-          e.preventDefault();
-          playSound(note);
-
-          key.classList.add('active');
-          setTimeout(() => {
-            key.classList.remove('active');
-          }, 150);
-        };
-
-        key.addEventListener("pointerdown", handler);
-      });
+            pianoElement.appendChild(key);
+        });
     });
 
-    window.addEventListener("pointerdown", initAudioContext, { once: true });
+    function playNote(note, element) {
+        if (Tone.context.state !== 'running') Tone.start();
+        synth.triggerAttack(note);
+        element.classList.add('active');
+    }
 
-    // --- ביטול זום בהקשה כפולה ---
-    let lastTouch = 0;
-    document.addEventListener("touchstart", function (e) {
-      const now = Date.now();
-      if (now - lastTouch <= 300) {
-        e.preventDefault(); // מונע double-tap zoom
-      }
-      lastTouch = now;
+    function stopNote(note, element) {
+        synth.triggerRelease(note);
+        element.classList.remove('active');
+    }
+
+    // מניעת גלילה וזום במובייל
+    document.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 1) e.preventDefault(); // מניעת זום עם שתי אצבעות
+        
+        const touch = e.touches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (el && el.classList.contains('key') && !el.classList.contains('active')) {
+            playNote(el.dataset.note, el);
+        }
     }, { passive: false });
 
-    // --- נגינה ברצף עם גרירה ---
-    let lastKey = null;
-
-    function getKeyFromPoint(x, y) {
-      const elem = document.elementFromPoint(x, y);
-      if (elem && (elem.classList.contains("key") || elem.classList.contains("black"))) {
-        return elem;
-      }
-      return null;
-    }
-
-    // גרירה עם עכבר / עט
-    document.addEventListener("pointermove", (e) => {
-      if (e.buttons === 0) return;
-      const key = getKeyFromPoint(e.clientX, e.clientY);
-      if (key && key !== lastKey) {
-        const note = key.getAttribute("data-note");
-        if (note) {
-          playSound(note);
-          key.classList.add("active");
-          setTimeout(() => key.classList.remove("active"), 150);
-        }
-        lastKey = key;
-      }
-    });
-    document.addEventListener("pointerup", () => { lastKey = null; });
-
-    // גרירה עם אצבע (מובייל)
-    document.addEventListener("touchmove", (e) => {
-      const touch = e.touches[0];
-      const key = getKeyFromPoint(touch.clientX, touch.clientY);
-      if (key && key !== lastKey) {
-        const note = key.getAttribute("data-note");
-        if (note) {
-          playSound(note);
-          key.classList.add("active");
-          setTimeout(() => key.classList.remove("active"), 150);
-        }
-        lastKey = key;
-      }
-    }, { passive: false });
-
-    document.addEventListener("touchend", () => {
-      lastKey = null;
-    });
-  </script>
+    window.oncontextmenu = (e) => e.preventDefault();
+</script>
 
 </body>
 </html>
-
-

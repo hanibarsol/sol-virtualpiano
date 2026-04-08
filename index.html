@@ -1,144 +1,21 @@
-<!DOCTYPE html>
-<html lang="he">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>הפסנתר שלי</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: #222;
-            user-select: none; -webkit-user-select: none; touch-action: none;
-        }
-
-        #piano-container {
-            display: flex; justify-content: center; align-items: flex-start;
-            width: 100%; height: 85vh; padding-top: 5vh;
-        }
-
-        .piano { display: flex; position: relative; direction: ltr; height: 100%; }
-
-        .key {
-            position: relative; border: 1px solid #000; box-sizing: border-box;
-            cursor: pointer; display: flex; flex-direction: column;
-            justify-content: flex-end; align-items: center; padding-bottom: 15px;
-        }
-
-        .white-key {
-            width: 70px; height: 100%; background-color: white;
-            z-index: 1; border-radius: 0 0 8px 8px;
-        }
-
-        .black-key {
-            width: 45px; height: 60%; background-color: black;
-            z-index: 2; margin-left: -22.5px; margin-right: -22.5px;
-            border-radius: 0 0 5px 5px;
-        }
-
-        .key.active { background-color: #ffeb3b !important; }
-
-        .character-img {
-            width: 90%; pointer-events: none; -webkit-user-drag: none;
-            margin-bottom: 5px; border-radius: 4px;
-        }
-
-        @media (max-width: 768px) {
-            .white-key { width: 50px; }
-            .black-key { width: 34px; margin-left: -17px; margin-right: -17px; }
-        }
-    </style>
-</head>
-<body>
-
-<div id="piano-container">
-    <div class="piano" id="piano"></div>
-</div>
-
-<script>
-    // הגדרת נתיבי התמונות (תיקיית new)
+// הגדרת שמות התמונות (כשהן באותה תיקייה עם ה-index.html)
     const characterImages = [
-        "new/דו.jpg", "new/רה.jpg", "new/מי.jpg", "new/פה.jpg", 
-        "new/סול.jpg", "new/לה.jpg", "new/סי.jpg", // אוקטבה 3
-        "new/דו.jpg", "new/רה.jpg", "new/מי.jpg", "new/פה.jpg", 
-        "new/סול.jpg", "new/לה.jpg", "new/סי.jpg"  // אוקטבה 4
+        "דו.jpg", "רה.jpg", "מי.jpg", "פה.jpg", 
+        "סול.jpg", "לה.jpg", "סי.jpg", // אוקטבה 3
+        "דו.jpg", "רה.jpg", "מי.jpg", "פה.jpg", 
+        "סול.jpg", "לה.jpg", "סי.jpg"  // אוקטבה 4
     ];
 
-    // הגדרת הדגימות מהתיקייה sounds (פורמט wav)
+    // הגדרת הצלילים (כשהם באותה תיקייה עם ה-index.html)
     const sampler = new Tone.Sampler({
         urls: {
-            "C3": "sounds/c3.wav", "C#3": "sounds/cd3.wav", "D3": "sounds/d3.wav", "D#3": "sounds/dd3.wav",
-            "E3": "sounds/e3.wav", "F3": "sounds/f3.wav", "F#3": "sounds/fs3.wav", "G3": "sounds/g3.wav",
-            "G#3": "sounds/gs3.wav", "A3": "sounds/a3.wav", "A#3": "sounds/ad3.wav", "B3": "sounds/b3.wav",
-            "C4": "sounds/c4.wav", "C#4": "sounds/cd4.wav", "D4": "sounds/d4.wav", "D#4": "sounds/dd4.wav",
-            "E4": "sounds/e4.wav", "F4": "sounds/f4.wav", "F#4": "sounds/fs4.wav", "G4": "sounds/g4.wav",
-            "G#4": "sounds/gs4.wav", "A4": "sounds/a4.wav", "A#4": "sounds/ad4.wav", "B4": "sounds/b4.wav"
+            "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav",
+            "E3": "e3.wav", "F3": "f3.wav", "F#3": "fs3.wav", "G3": "g3.wav",
+            "G#3": "gs3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
+            "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav",
+            "E4": "e4.wav", "F4": "f4.wav", "F#4": "fs4.wav", "G4": "g4.wav",
+            "G#4": "gs4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
         },
-        baseUrl: "./",
-        onload: () => { console.log("כל הצלילים נטענו בהצלחה!"); }
+        baseUrl: "./", // מחפש בתיקייה הנוכחית
+        onload: () => { console.log("הצלילים נטענו!"); }
     }).toDestination();
-
-    const pianoElement = document.getElementById('piano');
-    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const octaves = [3, 4];
-    let whiteKeyIndex = 0;
-
-    octaves.forEach(octave => {
-        notes.forEach(note => {
-            const isBlack = note.includes('#');
-            const fullNote = note + octave;
-            const key = document.createElement('div');
-            key.className = `key ${isBlack ? 'black-key' : 'white-key'}`;
-            key.dataset.note = fullNote;
-
-            if (!isBlack) {
-                const img = document.createElement('img');
-                img.src = characterImages[whiteKeyIndex] || "";
-                img.className = 'character-img';
-                img.oncontextmenu = (e) => e.preventDefault();
-                key.appendChild(img);
-                whiteKeyIndex++;
-            }
-
-            // פונקציות נגינה
-            const play = (e) => {
-                if (e.type === 'touchstart') e.preventDefault();
-                if (Tone.context.state !== 'running') Tone.start();
-                sampler.triggerAttack(fullNote);
-                key.classList.add('active');
-            };
-
-            const stop = (e) => {
-                sampler.triggerRelease(fullNote);
-                key.classList.remove('active');
-            };
-
-            key.addEventListener('mousedown', play);
-            key.addEventListener('mouseup', stop);
-            key.addEventListener('mouseleave', stop);
-            key.addEventListener('touchstart', play);
-            key.addEventListener('touchend', stop);
-            
-            // תמיכה בהחלקה
-            key.addEventListener('mouseenter', (e) => { if (e.buttons === 1) play(e); });
-
-            pianoElement.appendChild(key);
-        });
-    });
-
-    // מניעת גלילה ותמיכה בנגינה רציפה במובייל
-    document.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        const el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (el && el.classList.contains('key') && !el.classList.contains('active')) {
-            const note = el.dataset.note;
-            sampler.triggerAttack(note);
-            el.classList.add('active');
-            // כיבוי אוטומטי של הקליד אחרי חצי שנייה בהחלקה
-            setTimeout(() => el.classList.remove('active'), 500);
-        }
-    }, { passive: false });
-
-</script>
-</body>
-</html>

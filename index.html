@@ -109,24 +109,41 @@
     Tone.context.latencyHint = 'fastest';
     Tone.context.lookAhead = 0;
 
-    // הגדרת הריברב (הדהוד)
-    const reverb = new Tone.Reverb({
-        decay: 4, 
-        wet: 0.3 
-    }).toDestination();
+   // 1. הדהוד קצת יותר עדין כדי שלא יפריע כשהפדאל כבוי
+const reverb = new Tone.Reverb({
+    decay: 2.5, // הורדנו מ-4 כדי להרגיש את ההבדל
+    wet: 0.2    // הורדנו מ-0.3 כדי שהצליל היבש יהיה ברור יותר
+}).toDestination();
 
-    // הגדרת הסאמפלר
-    const sampler = new Tone.Sampler({
-        urls: {
-            "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
-            "F3": "f3.wav", "F#3": "fd3.wav", "G3": "g3.wav", "G#3": "gd3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
-            "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav", "E4": "e4.wav",
-            "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
-        },
-        baseUrl: "sounds/",
-        release: 1,
-        onload: () => console.log("כל הצלילים נטענו!")
-    }).connect(reverb);
+// 2. הגדרת הסאמפלר עם release קצר מאוד כברירת מחדל
+const sampler = new Tone.Sampler({
+    urls: {
+        "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
+        "F3": "f3.wav", "F#3": "fd3.wav", "G3": "g3.wav", "G#3": "gd3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
+        "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav", "E4": "e4.wav",
+        "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
+    },
+    baseUrl: "sounds/",
+    release: 0.5, // <--- התחלה קצרה מאוד!
+    onload: () => console.log("כל הצלילים נטענו!")
+}).connect(reverb);
+
+// 3. עדכון פונקציית הכפתור
+sustainBtn.addEventListener('click', () => {
+    isSustainActive = !isSustainActive;
+    
+    if (isSustainActive) {
+        sustainBtn.innerText = "פדאל (Sustain): דולק";
+        sustainBtn.classList.add('active');
+        // שינוי ה-release לערך גבוה
+        sampler.set({ release: 4 }); 
+    } else {
+        sustainBtn.innerText = "פדאל (Sustain): כבוי";
+        sustainBtn.classList.remove('active');
+        // החזרה לערך קצר מאוד
+        sampler.set({ release: 0.5 }); 
+    }
+});
 
     // התחלת הסאונד בלחיצה על מסך הפתיחה
     startScreen.addEventListener('click', async () => {

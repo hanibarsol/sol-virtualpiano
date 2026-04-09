@@ -63,8 +63,22 @@
             object-fit: contain; pointer-events: none; 
             /* הוספת מרווח בטחון קבוע מלמטה כדי שהדמות לא תיחתך */
             margin-bottom: 60px; /* <--- המפתח להעלאת הדמות למעלה */
+        }/* --- התיקון הסופי והקריטי למצב שכיבה (Landscape) --- */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .piano-container { height: 100vh; }
+            .key { 
+                /* במקום להיצמד לתחתית, הדמות תקפוץ למרכז */
+                justify-content: center; 
+                padding-bottom: 0px; 
+            }
+            .black-key { 
+                height: 40%; /* מקצרים עוד קצת כדי לפנות מקום */
+            }
+            .character-img { 
+                max-height: 45%; /* מקטינים כדי שתעלה מעל ה"אזור המת" של המסך */
+                margin-bottom: 0px; 
+            }
         }
-
     </style>
 </head>
 <body>

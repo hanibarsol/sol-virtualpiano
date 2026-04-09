@@ -9,7 +9,7 @@
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
             background-color: #000; user-select: none; -webkit-user-select: none; 
-            touch-action: none; font-family: sans-serif;
+            touch-action: none; 
         }
 
         #start-screen { 
@@ -29,50 +29,47 @@
             padding: 0; margin: 0;
         }
 
-        .piano { display: flex; position: relative; direction: ltr; height: 100%; width: 100%; }
+        .piano { 
+            display: flex; position: relative; direction: ltr; height: 100%; width: 100%;
+        }
         
-        /* ברירת מחדל (מצב עומד/פורטרט) */
         .key { 
             position: relative; border: 1px solid #000; box-sizing: border-box; 
             display: flex; flex-direction: column; 
-            justify-content: flex-end; /* נצמד לתחתית במצב עומד */
+            /* שינוי מרכזי: ממקמים את התוכן במרכז המקש כדי שלא ייחתך למטה */
+            justify-content: flex-end; 
             align-items: center; 
-            padding-bottom: 2vh;
         }
 
-        .white-key { flex: 1 0 auto; width: 7.14vw; min-width: 60px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 10px 10px; }
-        .black-key { width: 4.5vw; min-width: 36px; height: 55%; background-color: #333; z-index: 2; margin-left: -2.25vw; margin-right: -2.25vw; border-radius: 0 0 6px 6px; }
+        .white-key { 
+            flex: 1 0 auto; width: 7.14vw; min-width: 60px; 
+            height: 100%; background-color: white; z-index: 1; 
+            border-radius: 0 0 10px 10px; 
+        }
+
+        .black-key { 
+            width: 4.5vw; min-width: 36px; height: 60%; 
+            background-color: #333; z-index: 2; 
+            margin-left: -2.25vw; margin-right: -2.25vw; 
+            border-radius: 0 0 6px 6px; 
+        }
         
         .key.active { background-color: #ffeb3b !important; }
 
+        /* הגדרות מעודכנות לדמות */
         .character-img { 
-            width: 85%; height: auto; 
-            max-height: 60%; 
+            width: 95%; height: auto; 
+            max-height: 80%; /* הקטנו מעט את הגובה המקסימלי כדי לתת מרווח */
             object-fit: contain; pointer-events: none; 
-            margin-bottom: 5px; 
+            /* הוספת מרווח בטחון קבוע מלמטה כדי שהדמות לא תיחתך */
+            margin-bottom: 60px; /* <--- המפתח להעלאת הדמות למעלה */
         }
 
-        /* --- התיקון הסופי והקריטי למצב שכיבה (Landscape) --- */
-        @media (orientation: landscape) and (max-height: 500px) {
-            .piano-container { height: 100vh; }
-            .key { 
-                /* במקום להיצמד לתחתית, הדמות תקפוץ למרכז */
-                justify-content: center; 
-                padding-bottom: 0px; 
-            }
-            .black-key { 
-                height: 40%; /* מקצרים עוד קצת כדי לפנות מקום */
-            }
-            .character-img { 
-                max-height: 45%; /* מקטינים כדי שתעלה מעל ה"אזור המת" של המסך */
-                margin-bottom: 0px; 
-            }
-        }
     </style>
 </head>
 <body>
 
-<div id="start-screen"><h1>לחצי להפעלה 🎹</h1></div>
+<div id="start-screen"><h1>הפסנתר של סול 🎹</h1></div>
 
 <div id="piano-scroll-wrapper">
     <div id="piano-container">
@@ -81,9 +78,11 @@
 </div>
 
 <script>
-    // הגדרות לייטנסי מהיר
     Tone.context.latencyHint = 'fastest';
     Tone.context.lookAhead = 0;
+
+    const startScreen = document.getElementById('start-screen');
+    let isMouseDown = false;
 
     const sampler = new Tone.Sampler({
         urls: {
@@ -93,13 +92,10 @@
             "F4": "f4.mp4", "F#4": "fd4.mp4", "G4": "g4.mp4", "G#4": "gd4.mp4", "A4": "a4.mp4", "A#4": "ad4.mp4", "B4": "b4.mp4"
         },
         baseUrl: "",
-        release: 4, // מאזן צליל ארוך וביצועים
-        onload: () => console.log("Ready")
+        release: 9, 
+        onload: () => console.log("המערכת מוכנה")
     }).toDestination();
 
-    sampler.polyphony = 12; // מונע דיליי בטאבלט
-
-    const startScreen = document.getElementById('start-screen');
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
@@ -119,14 +115,17 @@
             key.dataset.note = fullNote;
 
             if (!isBlack) {
-                const spacer = document.createElement('div');
-                spacer.style.flexGrow = "1";
-                key.appendChild(spacer);
+                // מרווח עליון שדוחף את התמונה למטה
+                const topSpacer = document.createElement('div');
+                topSpacer.style.flexGrow = "1";
+                topSpacer.style.minHeight = "20px"; // נותן מרווח בטחון מלמעלה
+                key.appendChild(topSpacer);
 
                 const img = document.createElement('img');
                 img.src = characterImages[whiteKeyIndex] || "";
                 img.className = 'character-img';
                 key.appendChild(img);
+
                 whiteKeyIndex++;
             }
 
@@ -139,8 +138,10 @@
                 sampler.triggerRelease(fullNote);
             };
 
-            key.onmousedown = (e) => { e.preventDefault(); play(); };
-            key.onmouseup = stop;
+            key.onmousedown = (e) => { e.preventDefault(); isMouseDown = true; play(); };
+            key.onmouseup = () => { isMouseDown = false; stop(); };
+            key.onmouseenter = () => { if (isMouseDown) play(); };
+            key.onmouseleave = stop;
             key.ontouchstart = (e) => { e.preventDefault(); play(); };
             key.ontouchend = (e) => { e.preventDefault(); stop(); };
 
@@ -148,18 +149,13 @@
         });
     });
 
-    let lastNote = null;
     document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         const el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (el && el.classList.contains('key') && el.dataset.note !== lastNote) {
+        if (el && el.classList.contains('key') && !el.classList.contains('active')) {
             sampler.triggerAttack(el.dataset.note);
             el.classList.add('active');
-            lastNote = el.dataset.note;
-            setTimeout(() => { 
-                el.classList.remove('active');
-                if (lastNote === el.dataset.note) lastNote = null;
-            }, 300);
+            setTimeout(() => el.classList.remove('active'), 400);
         }
     }, { passive: false });
 </script>

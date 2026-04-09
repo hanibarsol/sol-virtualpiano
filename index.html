@@ -8,24 +8,28 @@
     <style>
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
-            background-color: #1a1a1a; user-select: none; -webkit-user-select: none; 
+            background-color: #000; user-select: none; -webkit-user-select: none; 
             touch-action: none; 
         }
 
         #start-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); color: white; display: flex; 
+            background: rgba(0,0,0,0.95); color: white; display: flex; 
             justify-content: center; align-items: center; z-index: 1000; 
             cursor: pointer; text-align: center; 
         }
 
         #piano-scroll-wrapper {
-            width: 100%; height: 100%; overflow-x: auto; overflow-y: hidden;
-            display: flex; align-items: center; 
+            width: 100vw; height: 100vh; overflow-x: auto; overflow-y: hidden;
+            display: block; background-color: #000;
         }
 
-        #piano-container { display: flex; height: 90vh; min-width: max-content; }
-        .piano { display: flex; position: relative; direction: ltr; }
+        #piano-container { 
+            display: flex; height: 100%; width: max-content; 
+            padding: 0; margin: 0;
+        }
+
+        .piano { display: flex; position: relative; direction: ltr; height: 100%; }
         
         .key { 
             position: relative; border: 1px solid #000; box-sizing: border-box; 
@@ -33,8 +37,9 @@
             align-items: center; padding-bottom: 20px;
         }
 
-        .white-key { width: 70px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 8px 8px; }
-        .black-key { width: 40px; height: 60%; background-color: #333; z-index: 2; margin-left: -20px; margin-right: -20px; border-radius: 0 0 5px 5px; }
+        /* הגדרת רוחב קבועה כדי שלא יהיו רווחים מוזרים */
+        .white-key { width: 80px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 10px 10px; }
+        .black-key { width: 46px; height: 60%; background-color: #333; z-index: 2; margin-left: -23px; margin-right: -23px; border-radius: 0 0 6px 6px; }
         
         .key.active { background-color: #ffeb3b !important; }
 
@@ -55,16 +60,14 @@
 </div>
 
 <script>
+    // הגדרות לייטנסי נמוך במיוחד למניעת דיליי בטאבלטים
+    Tone.context.latencyHint = 'fastest';
+    Tone.context.lookAhead = 0;
+
     const startScreen = document.getElementById('start-screen');
     let isMouseDown = false;
 
-    // 1. הגדרת סאונד - ריברב (הדהוד)
-    const reverb = new Tone.Reverb({
-        decay: 3.5, // משך ההדהוד
-        wet: 0.3    // עוצמת ההדהוד
-    }).toDestination();
-
-    // 2. הגדרת הסאמפלר עם צליל ארוך מראש (release: 3)
+    // הגדרת הסאונד ללא אפקטים כבדים כדי למנוע דיליי, אבל עם Release ארוך מאוד
     const sampler = new Tone.Sampler({
         urls: {
             "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
@@ -73,17 +76,15 @@
             "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
         },
         baseUrl: "sounds/",
-        release: 3, // <--- כאן הגדרתי שהצליל יהיה ארוך
-        onload: () => console.log("הצלילים מוכנים!")
-    }).connect(reverb);
+        release: 5, // צליל ארוך מאוד (כמו פדאל תמידי)
+        onload: () => console.log("מוכן!")
+    }).toDestination();
 
-    // התחלת הסאונד בלחיצה על המסך
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
     });
 
-    // בניית המקלדת
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const characterImages = ["דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png", "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"];
     const pianoElement = document.getElementById('piano');
@@ -101,7 +102,6 @@
                 const spacer = document.createElement('div');
                 spacer.style.flexGrow = "1";
                 key.appendChild(spacer);
-
                 const img = document.createElement('img');
                 img.src = characterImages[whiteKeyIndex] || "";
                 img.className = 'character-img';
@@ -109,7 +109,6 @@
                 whiteKeyIndex++;
             }
 
-            // פונקציות נגינה
             const play = () => {
                 key.classList.add('active');
                 sampler.triggerAttack(fullNote);
@@ -119,7 +118,6 @@
                 sampler.triggerRelease(fullNote);
             };
 
-            // אירועי עכבר ומגע
             key.onmousedown = (e) => { e.preventDefault(); isMouseDown = true; play(); };
             key.onmouseup = () => { isMouseDown = false; stop(); };
             key.onmouseenter = () => { if (isMouseDown) play(); };
@@ -131,7 +129,6 @@
         });
     });
 
-    // החלקה במובייל
     document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         const el = document.elementFromPoint(touch.clientX, touch.clientY);

@@ -19,13 +19,11 @@
             cursor: pointer; text-align: center; 
         }
 
-        /* wrapper שדואג למלא את כל המסך */
         #piano-scroll-wrapper {
             width: 100vw; height: 100vh; overflow-x: auto; overflow-y: hidden;
             background-color: #000; display: flex;
         }
 
-        /* המיכל של המקשים נמתח לכל הרווח */
         #piano-container { 
             display: flex; height: 100%; width: 100%; min-width: 100vw; 
             padding: 0; margin: 0;
@@ -37,11 +35,12 @@
         
         .key { 
             position: relative; border: 1px solid #000; box-sizing: border-box; 
-            display: flex; flex-direction: column; justify-content: flex-end; 
-            align-items: center; padding-bottom: 20px;
+            display: flex; flex-direction: column; 
+            /* שינוי מרכזי: ממקמים את התוכן במרכז המקש כדי שלא ייחתך למטה */
+            justify-content: flex-end; 
+            align-items: center; 
         }
 
-        /* שימוש ב-flex-grow כדי שהמקשים יתחלקו על כל רוחב המסך */
         .white-key { 
             flex: 1 0 auto; width: 7.14vw; min-width: 60px; 
             height: 100%; background-color: white; z-index: 1; 
@@ -57,9 +56,13 @@
         
         .key.active { background-color: #ffeb3b !important; }
 
+        /* הגדרות מעודכנות לדמות */
         .character-img { 
-            width: 85%; height: auto; max-height: 60%; 
-            object-fit: contain; pointer-events: none; margin-bottom: 5px; 
+            width: 85%; height: auto; 
+            max-height: 50%; /* הקטנו מעט את הגובה המקסימלי כדי לתת מרווח */
+            object-fit: contain; pointer-events: none; 
+            /* הוספת מרווח בטחון קבוע מלמטה כדי שהדמות לא תיחתך */
+            margin-bottom: 25px; /* <--- המפתח להעלאת הדמות למעלה */
         }
 
     </style>
@@ -75,14 +78,12 @@
 </div>
 
 <script>
-    // הגדרות מהירות למניעת דיליי
     Tone.context.latencyHint = 'fastest';
     Tone.context.lookAhead = 0;
 
     const startScreen = document.getElementById('start-screen');
     let isMouseDown = false;
 
-    // סאמפלר עם צליל ארוך מאוד (פדאל מובנה)
     const sampler = new Tone.Sampler({
         urls: {
             "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
@@ -114,13 +115,17 @@
             key.dataset.note = fullNote;
 
             if (!isBlack) {
-                const spacer = document.createElement('div');
-                spacer.style.flexGrow = "1";
-                key.appendChild(spacer);
+                // מרווח עליון שדוחף את התמונה למטה
+                const topSpacer = document.createElement('div');
+                topSpacer.style.flexGrow = "1";
+                topSpacer.style.minHeight = "20px"; // נותן מרווח בטחון מלמעלה
+                key.appendChild(topSpacer);
+
                 const img = document.createElement('img');
                 img.src = characterImages[whiteKeyIndex] || "";
                 img.className = 'character-img';
                 key.appendChild(img);
+
                 whiteKeyIndex++;
             }
 

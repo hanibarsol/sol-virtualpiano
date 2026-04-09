@@ -2,7 +2,7 @@
 <html lang="he">
 <head>
     <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>הפסנתר הוירטואלי של סול</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
@@ -11,7 +11,37 @@
             background-color: #1a1a1a; user-select: none; -webkit-user-select: none; 
             touch-action: none; 
         }
-        
+
+        /* עיצוב כפתור הפדאל */
+        #controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 500;
+        }
+
+        #sustain-btn {
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: sans-serif;
+            background-color: #444;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        #sustain-btn.active {
+            background-color: #ffeb3b;
+            color: black;
+            border-color: #ffeb3b;
+            box-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+            transform: scale(1.05);
+        }
+
         #start-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.9); color: white; display: flex; 
@@ -20,75 +50,48 @@
         }
 
         #piano-scroll-wrapper {
-            width: 100%;
-            height: 100%;
-            overflow-x: auto; 
-            overflow-y: hidden;
-            display: flex;
-            justify-content: flex-start; /* הצמדה לשמאל/ימין למניעת רווח מוזר */
-            align-items: center; 
+            width: 100%; height: 100%; overflow-x: auto; overflow-y: hidden;
+            display: flex; justify-content: flex-start; align-items: center; 
             -webkit-overflow-scrolling: touch;
         }
 
         #piano-container { 
-            display: flex; 
-            width: 100%; /* שימוש בכל הרווח הזמין */
-            min-width: max-content; 
-            height: 90vh; 
-            padding: 0; /* ביטול פדינג שיוצר שוליים שחורים */
+            display: flex; width: 100%; min-width: max-content; height: 90vh; 
         }
 
         .piano { display: flex; position: relative; direction: ltr; height: 100%; flex-grow: 1; }
         
-.key { 
-    position: relative; 
-    border: 1px solid #000; 
-    box-sizing: border-box; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: flex-end; /* דוחף לתחתית */
-    align-items: center; 
-    padding-bottom: 20px; /* מרחק מהקצה התחתון */
-    padding-top: 0; /* ודאי שזה 0 */
-}
-
-        /* הגדלת הקלידים מעט כדי שימלאו את המסך */
-        .white-key { width: 7.14vw; min-width: 50px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 8px 8px; }
-        .black-key { width: 4.5vw; min-width: 32px; height: 60%; background-color: #333; z-index: 2; margin-left: -2.25vw; margin-right: -2.25vw; border-radius: 0 0 5px 5px; }
-        
-    
-
-        .key.active { background-color: #ffeb3b !important; }
-
-  .character-img { 
-            width: 90%; 
-            height: auto; /* מאפשר לתמונה לשמור על הפרופורציות שלה */
-            max-height: 55%; /* כאן את קובעת כמה גדולה היא תהיה. תגדילי ל-60% אם את רוצה עוד יותר גדול */
-            object-fit: contain;
-            pointer-events: none; 
-            -webkit-user-drag: none; 
-            margin-bottom: 5px; 
+        .key { 
+            position: relative; border: 1px solid #000; box-sizing: border-box; 
+            display: flex; flex-direction: column; justify-content: flex-end; 
+            align-items: center; padding-bottom: 20px;
         }
 
-     /* התאמות למסכים קטנים/שוכבים */
-@media (max-height: 500px) {
-    #piano-container { height: 90vh; }
-    .white-key { width: 50px; }
-    .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
-    /* כאן אנחנו מוודאים שהתמונה עדיין נראית טוב גם כשהמסך נמוך */
-    .character-img { max-height: 45%; } 
-}
+        .white-key { width: 7.14vw; min-width: 60px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 8px 8px; }
+        .black-key { width: 4.5vw; min-width: 36px; height: 60%; background-color: #333; z-index: 2; margin-left: -2.25vw; margin-right: -2.25vw; border-radius: 0 0 5px 5px; }
+        
+        .key.active { background-color: #ffeb3b !important; }
 
-/* התאמה לטלפונים במצב עומד */
-@media (max-width: 768px) and (orientation: portrait) {
-    .white-key { width: 48px; }
-    .black-key { width: 32px; margin-left: -16px; margin-right: -16px; }
-}
+        .character-img { 
+            width: 90%; height: auto; max-height: 55%; 
+            object-fit: contain; pointer-events: none; 
+            -webkit-user-drag: none; margin-bottom: 5px; 
+        }
+
+        @media (max-height: 500px) {
+            .white-key { min-width: 50px; }
+            .black-key { min-width: 32px; }
+            .character-img { max-height: 45%; } 
+        }
     </style>
 </head>
 <body>
 
 <div id="start-screen"><h1>לחצי כאן להפעלה 🎹</h1></div>
+
+<div id="controls">
+    <button id="sustain-btn">פדאל (Sustain): כבוי</button>
+</div>
 
 <div id="piano-scroll-wrapper">
     <div id="piano-container">
@@ -98,14 +101,51 @@
 
 <script>
     const startScreen = document.getElementById('start-screen');
+    const sustainBtn = document.getElementById('sustain-btn');
     let isMouseDown = false;
+    let isSustainActive = false;
 
-    // שיפור לייטנסי (Delay)
-    Tone.context.latencyHint = 'interactive';
+    // --- הגדרות סאונד ---
+    Tone.context.latencyHint = 'fastest';
+    Tone.context.lookAhead = 0;
 
+    // הגדרת הריברב (הדהוד)
+    const reverb = new Tone.Reverb({
+        decay: 4, 
+        wet: 0.3 
+    }).toDestination();
+
+    // הגדרת הסאמפלר
+    const sampler = new Tone.Sampler({
+        urls: {
+            "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
+            "F3": "f3.wav", "F#3": "fd3.wav", "G3": "g3.wav", "G#3": "gd3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
+            "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav", "E4": "e4.wav",
+            "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
+        },
+        baseUrl: "sounds/",
+        release: 1,
+        onload: () => console.log("כל הצלילים נטענו!")
+    }).connect(reverb);
+
+    // התחלת הסאונד בלחיצה על מסך הפתיחה
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
+    });
+
+    // ניהול מצב פדאל
+    sustainBtn.addEventListener('click', () => {
+        isSustainActive = !isSustainActive;
+        if (isSustainActive) {
+            sustainBtn.innerText = "פדאל (Sustain): דולק";
+            sustainBtn.classList.add('active');
+            sampler.release = 4; // צליל ארוך
+        } else {
+            sustainBtn.innerText = "פדאל (Sustain): כבוי";
+            sustainBtn.classList.remove('active');
+            sampler.release = 1; // צליל רגיל
+        }
     });
 
     document.body.onmousedown = () => { isMouseDown = true; };
@@ -115,23 +155,6 @@
         "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png",
         "דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"
     ];
-
-   // הגדרת לייטנסי נמוך במיוחד
-    Tone.context.latencyHint = 'fastest';
-    Tone.context.lookAhead = 0;
-
-    const sampler = new Tone.Sampler({
-        urls: {
-            "C3": "c3.wav", "C#3": "cd3.wav", "D3": "d3.wav", "D#3": "dd3.wav", "E3": "e3.wav",
-            "F3": "f3.wav", "F#3": "fd3.wav", "G3": "g3.wav", "G#3": "gd3.wav", "A3": "a3.wav", "A#3": "ad3.wav", "B3": "b3.wav",
-            "C4": "c4.wav", "C#4": "cd4.wav", "D4": "d4.wav", "D#4": "dd4.wav", "E4": "e4.wav",
-            "F4": "f4.wav", "F#4": "fd4.wav", "G4": "g4.wav", "G#4": "gd4.wav", "A4": "a4.wav", "A#4": "ad4.wav", "B4": "b4.wav"
-        },
-        baseUrl: "sounds/",
-        release: 1, 
-        onload: () => console.log("כל הצלילים נטענו!")
-    }).toDestination();
-      
 
     const pianoElement = document.getElementById('piano');
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -146,20 +169,16 @@
             key.className = `key ${isBlack ? 'black-key' : 'white-key'}`;
             key.dataset.note = fullNote;
 
-         if (!isBlack) {
-                // יוצר רווח גמיש שדוחף את התמונה למטה
+            if (!isBlack) {
                 const spacer = document.createElement('div');
                 spacer.style.flexGrow = "1"; 
                 key.appendChild(spacer);
 
                 const img = document.createElement('img');
-                const imgName = characterImages[whiteKeyIndex];
-                img.src = imgName;
+                img.src = characterImages[whiteKeyIndex];
                 img.className = 'character-img';
-                img.draggable = false; // מונע בעיות גרירה
-                img.onerror = () => console.error("לא נמצאה תמונה בשם: " + imgName);
+                img.draggable = false;
                 key.appendChild(img);
-                
                 whiteKeyIndex++;
             }
 
@@ -176,7 +195,6 @@
             key.onmouseup = stop;
             key.onmouseleave = stop;
             key.onmouseenter = () => { if (isMouseDown) play(); };
-
             key.ontouchstart = (e) => { e.preventDefault(); play(); };
             key.ontouchend = (e) => { e.preventDefault(); stop(); };
 
@@ -184,14 +202,14 @@
         });
     });
 
+    // תמיכה בהחלקה על המקשים במובייל
     document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         const el = document.elementFromPoint(touch.clientX, touch.clientY);
         if (el && el.classList.contains('key') && !el.classList.contains('active')) {
             sampler.triggerAttack(el.dataset.note);
             el.classList.add('active');
-            // זמן שחרור קצר יותר בהחלקה כדי לאפשר נגינה רציפה
-            setTimeout(() => el.classList.remove('active'), 250);
+            setTimeout(() => el.classList.remove('active'), 300);
         }
     }, { passive: false });
 </script>

@@ -9,7 +9,7 @@
         body, html { 
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; 
             background-color: #000; user-select: none; -webkit-user-select: none; 
-            touch-action: none; 
+            touch-action: none; font-family: sans-serif;
         }
 
         #start-screen { 
@@ -31,31 +31,42 @@
 
         .piano { display: flex; position: relative; direction: ltr; height: 100%; width: 100%; }
         
+        /* ברירת מחדל (מצב עומד/פורטרט) */
         .key { 
             position: relative; border: 1px solid #000; box-sizing: border-box; 
-            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; 
-            padding-bottom: 2vh; /* צמצום המרווח התחתון כדי להשאיר מקום לתמונה */
+            display: flex; flex-direction: column; 
+            justify-content: flex-end; /* נצמד לתחתית במצב עומד */
+            align-items: center; 
+            padding-bottom: 2vh;
         }
 
         .white-key { flex: 1 0 auto; width: 7.14vw; min-width: 60px; height: 100%; background-color: white; z-index: 1; border-radius: 0 0 10px 10px; }
-        
-        /* קלידים שחורים כברירת מחדל */
         .black-key { width: 4.5vw; min-width: 36px; height: 55%; background-color: #333; z-index: 2; margin-left: -2.25vw; margin-right: -2.25vw; border-radius: 0 0 6px 6px; }
         
         .key.active { background-color: #ffeb3b !important; }
 
         .character-img { 
             width: 85%; height: auto; 
-            max-height: 60%; /* גובה מקסימלי סביר */
+            max-height: 60%; 
             object-fit: contain; pointer-events: none; 
             margin-bottom: 5px; 
         }
 
-        /* --- תיקון מיוחד למצב שכיבה (מסך נמוך) --- */
-        @media (max-height: 450px) {
-            .black-key { height: 45%; } /* מקצרים את השחורים כדי שלא יחנקו את המסך */
-            .character-img { max-height: 50%; margin-bottom: 2px; } /* מקטינים את הדמויות שייכנסו */
-            .key { padding-bottom: 5px; } /* מינימום מרווח למטה */
+        /* --- התיקון הסופי והקריטי למצב שכיבה (Landscape) --- */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .piano-container { height: 100vh; }
+            .key { 
+                /* במקום להיצמד לתחתית, הדמות תקפוץ למרכז */
+                justify-content: center; 
+                padding-bottom: 0px; 
+            }
+            .black-key { 
+                height: 40%; /* מקצרים עוד קצת כדי לפנות מקום */
+            }
+            .character-img { 
+                max-height: 45%; /* מקטינים כדי שתעלה מעל ה"אזור המת" של המסך */
+                margin-bottom: 0px; 
+            }
         }
     </style>
 </head>
@@ -70,6 +81,7 @@
 </div>
 
 <script>
+    // הגדרות לייטנסי מהיר
     Tone.context.latencyHint = 'fastest';
     Tone.context.lookAhead = 0;
 
@@ -81,11 +93,11 @@
             "F4": "f4.mp4", "F#4": "fd4.mp4", "G4": "g4.mp4", "G#4": "gd4.mp4", "A4": "a4.mp4", "A#4": "ad4.mp4", "B4": "b4.mp4"
         },
         baseUrl: "",
-        release: 4, 
+        release: 4, // מאזן צליל ארוך וביצועים
         onload: () => console.log("Ready")
     }).toDestination();
 
-    sampler.polyphony = 12; 
+    sampler.polyphony = 12; // מונע דיליי בטאבלט
 
     const startScreen = document.getElementById('start-screen');
     startScreen.addEventListener('click', async () => {
@@ -107,9 +119,9 @@
             key.dataset.note = fullNote;
 
             if (!isBlack) {
-                const topSpacer = document.createElement('div');
-                topSpacer.style.flexGrow = "1";
-                key.appendChild(topSpacer);
+                const spacer = document.createElement('div');
+                spacer.style.flexGrow = "1";
+                key.appendChild(spacer);
 
                 const img = document.createElement('img');
                 img.src = characterImages[whiteKeyIndex] || "";

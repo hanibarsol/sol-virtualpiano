@@ -62,7 +62,7 @@
             max-height: 60%; /* הקטנו מעט את הגובה המקסימלי כדי לתת מרווח */
             object-fit: contain; pointer-events: none; 
             /* הוספת מרווח בטחון קבוע מלמטה כדי שהדמות לא תיחתך */
-            margin-bottom: 40px; /* <--- המפתח להעלאת הדמות למעלה */
+            margin-bottom: 60px; /* <--- המפתח להעלאת הדמות למעלה */
         }
 
     </style>
@@ -121,7 +121,7 @@
                 // מרווח עליון שדוחף את התמונה למטה
                 const topSpacer = document.createElement('div');
                 topSpacer.style.flexGrow = "1";
-                topSpacer.style.minHeight = "20px"; // נותן מרווח בטחון מלמעלה
+                topSpacer.style.minHeight = "10px"; // נותן מרווח בטחון מלמעלה
                 key.appendChild(topSpacer);
 
                 const img = document.createElement('img');

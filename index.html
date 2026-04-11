@@ -149,13 +149,18 @@
         });
     });
 
+  let lastNote = null;
     document.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
         const el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (el && el.classList.contains('key') && !el.classList.contains('active')) {
+        if (el && el.classList.contains('key') && el.dataset.note !== lastNote) {
             sampler.triggerAttack(el.dataset.note);
             el.classList.add('active');
-            setTimeout(() => el.classList.remove('active'), 400);
+            lastNote = el.dataset.note;
+            setTimeout(() => { 
+                el.classList.remove('active');
+                if (lastNote === el.dataset.note) lastNote = null;
+            }, 300);
         }
     }, { passive: false });
 </script>

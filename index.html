@@ -65,11 +65,13 @@
                 whiteKeyIndex++;
             }
 
-            // פונקציית לחיצה מאוחדת
-            const handleStart = (e) => {
-                if(e) e.preventDefault();
+            // פונקציית התחלת צליל קבועה
+            const handleStart = () => {
+                // בדיקה למניעת הפעלה כפולה אם הקליד כבר פעיל
+                if (key.classList.contains('active')) return; 
+                
                 console.log("Pressed:", fullNote);
-                key.classList.add('active'); // חייב לצבוע בצהוב מיד!
+                key.classList.add('active');
                 try {
                     sampler.triggerAttack(fullNote);
                 } catch(err) {
@@ -77,17 +79,37 @@
                 }
             };
 
+            // פונקציית סיום צליל קבועה
             const handleEnd = () => {
+                if (!key.classList.contains('active')) return;
+                
                 key.classList.remove('active');
                 sampler.triggerRelease(fullNote);
             };
 
-            // הוספת המאזינים בצורה הכי פשוטה שיש
-            key.onmousedown = handleStart;
-            key.onmouseup = handleEnd;
-            key.onmouseleave = handleEnd;
-            key.ontouchstart = handleStart;
-            key.ontouchend = handleEnd;
+            // מאזיני עכבר (למחשב)
+            key.addEventListener('mousedown', (e) => {
+                handleStart();
+            });
+            
+            key.addEventListener('mouseup', handleEnd);
+            key.addEventListener('mouseleave', handleEnd);
+
+            // מאזיני מגע (לטלפונים/טאבלטים)
+            key.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // מונע מהדפדפן לשלוח גם אירוע mousedown מיד אחרי
+                handleStart();
+            });
+            
+            key.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleEnd();
+            });
+            
+            key.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                handleEnd();
+            });
 
             pianoElement.appendChild(key);
         });

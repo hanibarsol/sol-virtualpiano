@@ -13,11 +13,10 @@
             height: 100%; 
             overflow: hidden; 
             background-color: #222; 
-            /* חסימת בחירת טקסט ותפריטים ברמת העמוד */
             user-select: none; 
             -webkit-user-select: none; 
             touch-action: none; 
-            -webkit-touch-callout: none; 
+            -webkit-touch-callout: none;
         }
         #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; display: flex; justify-content: center; align-items: center; z-index: 100; cursor: pointer; font-size: 24px; }
         #piano-container { display: flex; justify-content: center; align-items: flex-start; width: 100%; height: 80vh; padding-top: 5vh; }
@@ -34,23 +33,36 @@
             align-items: center; 
             padding-bottom: 15px; 
             z-index: 10; 
-            /* חסימה מפורשת על הקלידים עצמם לניידים */
             touch-action: none;
             -webkit-touch-callout: none;
             user-select: none;
             -webkit-user-select: none;
+            /* מונע מהדפדפן לנסות להבין מה יש בתוך הקליד, הוא מתייחס רק לקליד עצמו */
+            -webkit-tap-highlight-color: transparent;
         }
         
         .white-key { width: 60px; height: 100%; background-color: white; border-radius: 0 0 5px 5px; }
-        .black-key { width: 40px; height: 60%; background-color: #333; z-index: 20; margin-left: -20px; margin-right: -20px; border-radius: 0 0 3px 3px; }
+        
+        /* שיפור ה-z-index של הקלידים השחורים כדי להפריד שכבות מגע */
+        .black-key { 
+            width: 40px; 
+            height: 60%; 
+            background-color: #333; 
+            z-index: 30; 
+            margin-left: -20px; 
+            margin-right: -20px; 
+            border-radius: 0 0 3px 3px; 
+        }
+        
         .key.active { background-color: #ffeb3b !important; }
         
         .character-img { 
             width: 80%; 
-            pointer-events: none; 
             margin-bottom: 10px; 
-            /* חסימת תפריט לחיצה ארוכה על התמונה עצמה ב-iOS */
-            -webkit-touch-callout: none; 
+            /* חיוני: מונע לחלוטין מהתמונה להגיב למגע או להפריע לקליד שמתחתיה */
+            pointer-events: none; 
+            -webkit-touch-callout: none;
+            user-select: none;
         }
     </style>
 </head>
@@ -66,7 +78,6 @@
     const startScreen = document.getElementById('start-screen');
     const pianoElement = document.getElementById('piano');
     
-    // הפעלת האודיו בלחיצה הראשונה
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
@@ -102,11 +113,9 @@
                 whiteKeyIndex++;
             }
 
-            // פונקציית התחלת צליל קבועה
+            // פונקציית התחלת צליל
             const handleStart = () => {
                 if (key.classList.contains('active')) return; 
-                
-                console.log("Pressed:", fullNote);
                 key.classList.add('active');
                 try {
                     sampler.triggerAttack(fullNote);
@@ -115,27 +124,28 @@
                 }
             };
 
-            // פונקציית סיום צליל קבועה
+            // פונקציית סיום צליל
             const handleEnd = () => {
                 if (!key.classList.contains('active')) return;
-                
                 key.classList.remove('active');
                 sampler.triggerRelease(fullNote);
             };
 
-            // מאזיני עכבר (למחשב)
-            key.addEventListener('mousedown', (e) => {
-                handleStart();
-            });
-            
+            // מאזיני עכבר למחשב
+            key.addEventListener('mousedown', (e) => { handleStart(); });
             key.addEventListener('mouseup', handleEnd);
             key.addEventListener('mouseleave', handleEnd);
 
-            // מאזיני מגע (לטלפונים/טאבלטים)
+            // מאזיני מגע מתוקנים לניידים וטאבלטים
             key.addEventListener('touchstart', (e) => {
                 e.preventDefault(); 
                 handleStart();
-            }, { passive: false }); // מבטיח שה-preventDefault יעבוד בצורה אמינה בדפדפנים מודרניים
+            }, { passive: false });
+            
+            // מניעת מצב שבו הדפדפן יחשוב שהאצבע זזה ומבטל את הלחיצה
+            key.addEventListener('touchmove', (e) => {
+                e.preventDefault(); 
+            }, { passive: false });
             
             key.addEventListener('touchend', (e) => {
                 e.preventDefault();

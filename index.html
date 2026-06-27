@@ -33,17 +33,18 @@
             align-items: center; 
             padding-bottom: 15px; 
             z-index: 10; 
-            touch-action: none;
+            
+            /* קריטי ביותר עבור Pointer Capture בניידים! */
+            touch-action: none; 
+            
             -webkit-touch-callout: none;
             user-select: none;
             -webkit-user-select: none;
-            /* מונע מהדפדפן לנסות להבין מה יש בתוך הקליד, הוא מתייחס רק לקליד עצמו */
             -webkit-tap-highlight-color: transparent;
         }
         
         .white-key { width: 60px; height: 100%; background-color: white; border-radius: 0 0 5px 5px; }
         
-        /* שיפור ה-z-index של הקלידים השחורים כדי להפריד שכבות מגע */
         .black-key { 
             width: 40px; 
             height: 60%; 
@@ -59,7 +60,6 @@
         .character-img { 
             width: 80%; 
             margin-bottom: 10px; 
-            /* חיוני: מונע לחלוטין מהתמונה להגיב למגע או להפריע לקליד שמתחתיה */
             pointer-events: none; 
             -webkit-touch-callout: none;
             user-select: none;
@@ -68,14 +68,13 @@
 </head>
 <body>
 
-
+<div id="start-screen">לחצי כאן כדי להפעיל את הפסנתר</div>
 
 <div id="piano-container">
     <div class="piano" id="piano"></div>
 </div>
 
 <script>
-    // שים לב שהסרנו את מאזיני ה-document.addEventListener הישנים למעלה
     const startScreen = document.getElementById('start-screen');
     const pianoElement = document.getElementById('piano');
 
@@ -140,26 +139,24 @@
 
             key.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
-                // הקסם: נועל את כל אירועי המגע הבאים לאלמנט הזה, לא משנה לאן האצבע תזוז
+                // הנועל הרשמי של האצבע לאלמנט
                 key.setPointerCapture(e.pointerId);
                 playNote();
             });
 
             key.addEventListener('pointermove', (e) => {
                 e.preventDefault();
-                // ברגע שיש פוינטר קאפצ'ר, האירוע הזה ימשיך לירות רק עבור הקליד המקורי
-                // אנחנו פשוט מונעים מהדפדפן לבצע פעולות גלילה/תזוזה מובנות
             });
 
             key.addEventListener('pointerup', (e) => {
                 e.preventDefault();
-                key.releasePointerCapture(e.pointerId);
+                try { key.releasePointerCapture(e.pointerId); } catch(err){}
                 stopNote();
             });
 
             key.addEventListener('pointercancel', (e) => {
                 e.preventDefault();
-                key.releasePointerCapture(e.pointerId);
+                try { key.releasePointerCapture(e.pointerId); } catch(err){}
                 stopNote();
             });
 

@@ -152,21 +152,32 @@
 
             // --- אירועי Pointer נקיים ללא התנגשויות ---
 
-            key.addEventListener('pointerdown', () => {
-                playNote();
-            });
+            key.addEventListener('pointerdown', (e) => {
 
-            key.addEventListener('pointerup', () => {
-                stopNote();
-            });
+    // "נועל" את האצבע על הקליד
+    key.setPointerCapture(e.pointerId);
 
-            key.addEventListener('pointerleave', () => {
-                stopNote();
-            });
+    playNote();
+});
 
-            key.addEventListener('pointercancel', () => {
-                stopNote();
-            });
+           key.addEventListener('pointerup', (e) => {
+
+    stopNote();
+
+    if (key.hasPointerCapture(e.pointerId)) {
+        key.releasePointerCapture(e.pointerId);
+    }
+});
+
+            
+            key.addEventListener('pointercancel', (e) => {
+
+    stopNote();
+
+    if (key.hasPointerCapture(e.pointerId)) {
+        key.releasePointerCapture(e.pointerId);
+    }
+});
 
             pianoElement.appendChild(key);
         });

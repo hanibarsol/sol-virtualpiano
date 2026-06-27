@@ -131,53 +131,54 @@
             }
 
             // לוגיקת הפעלה
-           const playNote = () => {
-    if (key.dataset.isPlaying === "true") return;
+            const playNote = () => {
+                if (key.dataset.isPlaying === "true") return; 
+                key.dataset.isPlaying = "true";
+                key.classList.add('active');
+                try {
+                    sampler.triggerAttack(fullNote);
+                } catch(err) {}
+            };
 
-    console.log("PLAY", fullNote);
+            // לוגיקת כיבוי
+            const stopNote = () => {
+                if (key.dataset.isPlaying === "false") return; 
+                key.dataset.isPlaying = "false";
+                key.classList.remove('active');
+                try {
+                    sampler.triggerRelease(fullNote);
+                } catch(err) {}
+            };
 
-    key.dataset.isPlaying = "true";
-    key.classList.add('active');
-    sampler.triggerAttack(fullNote);
-};
-
-const stopNote = () => {
-    if (key.dataset.isPlaying === "false") return;
-
-    console.log("STOP", fullNote);
-
-    key.dataset.isPlaying = "false";
-    key.classList.remove('active');
-    sampler.triggerRelease(fullNote);
-};
-            // --- אירועי Pointer נקיים ללא התנגשויות ---
+            // --- מנגנון חסימת כפל לחיצות בזמן תזוזה ---
+            let isTouchActive = false;
 
             key.addEventListener('pointerdown', (e) => {
+                // אם כבר יש לחיצה פעילה על הקליד הזה, נתעלם לחלוטין מאירועים נוספים (כמו תזוזה שמדמה לחיצה)
+                if (isTouchActive) return;
+                isTouchActive = true;
+                playNote();
+            });
 
-    // "נועל" את האצבע על הקליד
-    key.setPointerCapture(e.pointerId);
+            key.addEventListener('pointermove', (e) => {
+                // מונע מהדפדפן לנסות לגלול או לבצע מחווה בזמן תזוזה קטנה
+                e.preventDefault();
+            });
 
-    playNote();
-});
+            key.addEventListener('pointerup', (e) => {
+                isTouchActive = false;
+                stopNote();
+            });
 
-           key.addEventListener('pointerup', (e) => {
+            key.addEventListener('pointerleave', (e) => {
+                isTouchActive = false;
+                stopNote();
+            });
 
-    stopNote();
-
-    if (key.hasPointerCapture(e.pointerId)) {
-        key.releasePointerCapture(e.pointerId);
-    }
-});
-
-            
             key.addEventListener('pointercancel', (e) => {
-
-    stopNote();
-
-    if (key.hasPointerCapture(e.pointerId)) {
-        key.releasePointerCapture(e.pointerId);
-    }
-});
+                isTouchActive = false;
+                stopNote();
+            });
 
             pianoElement.appendChild(key);
         });

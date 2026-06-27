@@ -15,7 +15,7 @@
             background-color: #222; 
             user-select: none; 
             -webkit-user-select: none; 
-            /* חסימה הרקמטית לכל העמוד */
+            /* חסימה הרמטית של מחוות דפדפן ברמת ה-CSS */
             touch-action: none !important; 
             -webkit-touch-callout: none;
         }
@@ -49,7 +49,7 @@
             padding-bottom: 15px; 
             z-index: 10; 
             
-            /* הכרחי למנוע מהדפדפן לזהות גרירה כמחוות דפדוף */
+            /* מונע מהדפדפן לזהות גרירה כמחוות דפדוף או זום */
             touch-action: none !important; 
             
             -webkit-touch-callout: none;
@@ -93,12 +93,6 @@
     const startScreen = document.getElementById('start-screen');
     const pianoElement = document.getElementById('piano');
 
-    // חסימת מחוות דפדפן אגרסיבית ברמת ה-JS
-    // זה ימנע פיזית מהנייד לבטל את הלחיצה לטובת גלילה/זום ברגע שהאצבע זזה מילימטר
-    pianoElement.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
-    pianoElement.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-    pianoElement.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
-
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
@@ -136,7 +130,7 @@
                 whiteKeyIndex++;
             }
 
-            // לוגיקת הפעלה עם בדיקה כפולה
+            // לוגיקת הפעלה
             const playNote = () => {
                 if (key.dataset.isPlaying === "true") return; 
                 key.dataset.isPlaying = "true";
@@ -156,28 +150,21 @@
                 } catch(err) { console.log(err); }
             };
 
-            // --- שימוש ב-Pointer Events עם הגנה מלאה ---
+            // --- אירועי Pointer נקיים ללא התנגשויות ---
 
-            key.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                key.setPointerCapture(e.pointerId);
+            key.addEventListener('pointerdown', () => {
                 playNote();
             });
 
-            key.addEventListener('pointermove', (e) => {
-                // מונע מהזזה קטנה בתוך גבולות הקליד לעורר אירועי מערכת
-                e.preventDefault();
-            });
-
-            key.addEventListener('pointerup', (e) => {
-                e.preventDefault();
-                try { key.releasePointerCapture(e.pointerId); } catch(err){}
+            key.addEventListener('pointerup', () => {
                 stopNote();
             });
 
-            key.addEventListener('pointercancel', (e) => {
-                e.preventDefault();
-                try { key.releasePointerCapture(e.pointerId); } catch(err){}
+            key.addEventListener('pointerleave', () => {
+                stopNote();
+            });
+
+            key.addEventListener('pointercancel', () => {
                 stopNote();
             });
 

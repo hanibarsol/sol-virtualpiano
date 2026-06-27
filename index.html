@@ -78,15 +78,14 @@
     const startScreen = document.getElementById('start-screen');
     const pianoElement = document.getElementById('piano');
     
-    // אובייקט לאחסון המיקום של כל קליד במסך
-    let keyBounds = [];
-    
+    // מניעת כל התנהגויות ברירת המחדל של הנייד ברמת ה-document
+    document.addEventListener('touchstart', (e) => { if(e.target.closest('.key')) e.preventDefault(); }, { passive: false });
+    document.addEventListener('touchmove', (e) => { if(e.target.closest('.key')) e.preventDefault(); }, { passive: false });
+    document.addEventListener('touchend', (e) => { if(e.target.closest('.key')) e.preventDefault(); }, { passive: false });
+
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
-        
-        // חישוב מיקומים *לאחר* שהמסך מתנקה והמקלדת מוצגת במלואה
-        setTimeout(calculateKeyBounds, 100);
         console.log("Audio Context started");
     });
 
@@ -103,7 +102,7 @@
     const octaves = [3, 4];
     let whiteKeyIndex = 0;
 
-    // יצירת הקלידים (נשמר כמו קודם)
+    // בניית המקלדת
     octaves.forEach(octave => {
         notes.forEach(note => {
             const isBlack = note.includes('#');
@@ -111,6 +110,9 @@
             const key = document.createElement('div');
             key.className = `key ${isBlack ? 'black-key' : 'white-key'}`;
             key.dataset.note = fullNote;
+            
+            // שומר סף קריטי - האם הקליד מנגן כרגע פיזית?
+            key.dataset.isPlaying = "false"; 
 
             if (!isBlack) {
                 const img = document.createElement('img');
@@ -119,111 +121,66 @@
                 key.appendChild(img);
                 whiteKeyIndex++;
             }
+
+            // --- לוגיקת הפעלה וכיבוי מוגנת ---
+            const playNote = () => {
+                // אם הוא כבר מנגן, אל תעשה כלום! (חוסם את הלולאה והתזוזה)
+                if (key.dataset.isPlaying === "true") return; 
+                
+                key.dataset.isPlaying = "true";
+                key.classList.add('active');
+                try {
+                    sampler.triggerAttack(fullNote);
+                } catch(err) { console.log(err); }
+            };
+
+            const stopNote = () => {
+                // אם הוא לא מנגן, אין מה לכבות
+                if (key.dataset.isPlaying === "false") return; 
+                
+                key.dataset.isPlaying = "false";
+                key.classList.remove('active');
+                try {
+                    sampler.triggerRelease(fullNote);
+                } catch(err) { console.log(err); }
+            };
+
+            // --- מאזינים למחשב (עכבר) בלבד ---
+            key.addEventListener('mousedown', (e) => { playNote(); });
+            key.addEventListener('mouseup', stopNote);
+            key.addEventListener('mouseleave', stopNote);
+
+            // --- מאזינים לניידים (מגע) בלבד ---
+            // לחיצה ראשונית
+            key.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                playNote();
+            }, { passive: false });
+
+            // הגנה מתזוזה: אם מזיזים את האצבע בתוך הקליד, אנחנו פשוט חוסמים את האירוע
+            key.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // לא קוראים ל-playNote ולא ל-stopNote, פשוט משאירים את המצב הקיים
+            }, { passive: false });
+
+            // עזיבה
+            key.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                stopNote();
+            }, { passive: false });
+
+            key.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                stopNote();
+            }, { passive: false });
+
             pianoElement.appendChild(key);
         });
     });
-
-    const keys = document.querySelectorAll('.key');
-
-    // פונקציית עזר לחישוב מדויק של מיקום כל קליד
-    function calculateKeyBounds() {
-        keyBounds = [];
-        keys.forEach(key => {
-            const rect = key.getBoundingClientRect();
-            keyBounds.push({
-                element: key,
-                note: key.dataset.note,
-                top: rect.top,
-                bottom: rect.bottom,
-                left: rect.left,
-                right: rect.right,
-                isBlack: key.classList.contains('black-key'),
-                active: false // מצב הלחיצה
-            });
-        });
-    }
-
-    // חישוב מחדש אם משנים את כיוון המכשיר (rotate)
-    window.addEventListener('resize', calculateKeyBounds);
-
-    // ********** הליבה של הפתרון לניידים **********
-    
-    // מונע את כל ברירות המחדל של המגע
-    document.addEventListener('touchstart', (e) => { e.preventDefault(); }, { passive: false });
-    document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
-    document.addEventListener('touchend', (e) => { e.preventDefault(); }, { passive: false });
-
-    // פונקציה אבסולוטית למציאת הקליד מתחת לאצבע
-    function getKeyAtPoint(x, y) {
-        // שלב א': חיפוש רק בין הקלידים השחורים (Z-Index גבוה)
-        const blackKeys = keyBounds.filter(b => b.isBlack);
-        for (let b of blackKeys) {
-            if (x >= b.left && x <= b.right && y >= b.top && y <= b.bottom) {
-                return b;
-            }
-        }
-        // שלב ב': אם לא מצאנו, חיפוש בין הלבנים (Z-Index נמוך)
-        const whiteKeys = keyBounds.filter(b => !b.isBlack);
-        for (let b of whiteKeys) {
-            if (x >= b.left && x <= b.right && y >= b.top && y <= b.bottom) {
-                return b;
-            }
-        }
-        return null; // אין קליד
-    }
-
-    // ניהול מגע מרכזי על כל שטח המקלדת
-    pianoElement.addEventListener('touchstart', handleAllTouch);
-    pianoElement.addEventListener('touchmove', handleAllTouch);
-    pianoElement.addEventListener('touchend', handleAllTouchEnd);
-    pianoElement.addEventListener('touchcancel', handleAllTouchEnd);
-
-    function handleAllTouch(e) {
-        e.preventDefault();
-        
-        // יצירת סט של כל הקלידים הפעילים כרגע *אחרי החישוב המחודש*
-        let notesToStayActive = new Set();
-        
-        for (let i = 0; i < e.touches.length; i++) {
-            const touch = e.touches[i];
-            const boundUnderFinger = getKeyAtPoint(touch.clientX, touch.clientY);
-            
-            if (boundUnderFinger) {
-                notesToStayActive.add(boundUnderFinger.note);
-                
-                // התחלת צליל חדש (אם לא היה פעיל)
-                if (!boundUnderFinger.active) {
-                    boundUnderFinger.active = true;
-                    boundUnderFinger.element.classList.add('active');
-                    sampler.triggerAttack(boundUnderFinger.note);
-                }
-            }
-        }
-        
-        // עצימת צלילים שנעזבו
-        keyBounds.forEach(b => {
-            if (b.active && !notesToStayActive.has(b.note)) {
-                b.active = false;
-                b.element.classList.remove('active');
-                sampler.triggerRelease(b.note);
-            }
-        });
-    }
-
-    // כשמפסיקים מגע
-    function handleAllTouchEnd(e) {
-        if (e.touches.length === 0) {
-            // הכל כבוי
-            keyBounds.forEach(b => {
-                b.active = false;
-                b.element.classList.remove('active');
-                sampler.triggerRelease(b.note);
-            });
-        } else {
-            // האצבע עדיין על המסך (רק אצבע אחת הורמה)
-            handleAllTouch(e);
-        }
-    }
 </script>
 </body>
 </html>

@@ -131,25 +131,25 @@
             }
 
             // לוגיקת הפעלה
-            const playNote = () => {
-                if (key.dataset.isPlaying === "true") return; 
-                key.dataset.isPlaying = "true";
-                key.classList.add('active');
-                try {
-                    sampler.triggerAttack(fullNote);
-                } catch(err) { console.log(err); }
-            };
+           const playNote = () => {
+    if (key.dataset.isPlaying === "true") return;
 
-            // לוגיקת כיבוי
-            const stopNote = () => {
-                if (key.dataset.isPlaying === "false") return; 
-                key.dataset.isPlaying = "false";
-                key.classList.remove('active');
-                try {
-                    sampler.triggerRelease(fullNote);
-                } catch(err) { console.log(err); }
-            };
+    console.log("PLAY", fullNote);
 
+    key.dataset.isPlaying = "true";
+    key.classList.add('active');
+    sampler.triggerAttack(fullNote);
+};
+
+const stopNote = () => {
+    if (key.dataset.isPlaying === "false") return;
+
+    console.log("STOP", fullNote);
+
+    key.dataset.isPlaying = "false";
+    key.classList.remove('active');
+    sampler.triggerRelease(fullNote);
+};
             // --- אירועי Pointer נקיים ללא התנגשויות ---
 
             key.addEventListener('pointerdown', (e) => {

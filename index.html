@@ -97,6 +97,7 @@
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
+        initTouchControls(); // <--- מפעיל את הטאץ' רק אחרי שהמסך נסגר!
     });
 
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -145,59 +146,57 @@
         });
     });
 
-    // --- מנגנון מגע (טאץ') גלובלי משופר ---
-    let activeTouchedKey = null;
+    // --- עטפנו את מנגנון הטאץ' בפונקציה ---
+    function initTouchControls() {
+        let activeTouchedKey = null;
 
-    // פונקציית עזר למציאת הקליד המדויק מתחת לאצבע
-    const getKeyFromTouch = (touch) => {
-        const el = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (!el) return null;
-        return el.closest('.key'); // מוודא שגם נגיעה בדמות משויכת לקליד הנכון
-    };
+        const getKeyFromTouch = (touch) => {
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (!el) return null;
+            return el.closest('.key');
+        };
 
-    document.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const key = getKeyFromTouch(touch);
-        
-        if (key) {
-            activeTouchedKey = key;
-            key.classList.add('active');
-            sampler.triggerAttack(key.dataset.note);
-        }
-    }, { passive: false });
+        document.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const key = getKeyFromTouch(touch);
+            
+            if (key) {
+                activeTouchedKey = key;
+                key.classList.add('active');
+                sampler.triggerAttack(key.dataset.note);
+            }
+        }, { passive: false });
 
-    document.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const currentKey = getKeyFromTouch(touch);
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const currentKey = getKeyFromTouch(touch);
 
-        // אם החלקנו לקליד אחר
-        if (currentKey !== activeTouchedKey) {
-            // נכבה את הקליד הישן שעזבנו
+            if (currentKey !== activeTouchedKey) {
+                if (activeTouchedKey) {
+                    activeTouchedKey.classList.remove('active');
+                    sampler.triggerRelease(activeTouchedKey.dataset.note);
+                }
+                
+                if (currentKey) {
+                    currentKey.classList.add('active');
+                    sampler.triggerAttack(currentKey.dataset.note);
+                }
+                
+                activeTouchedKey = currentKey;
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', (e) => {
+            e.preventDefault();
             if (activeTouchedKey) {
                 activeTouchedKey.classList.remove('active');
                 sampler.triggerRelease(activeTouchedKey.dataset.note);
+                activeTouchedKey = null;
             }
-            
-            // ננגן ונפעיל את הקליד החדש שנכנסנו אליו
-            if (currentKey) {
-                currentKey.classList.add('active');
-                sampler.triggerAttack(currentKey.dataset.note);
-            }
-            
-            activeTouchedKey = currentKey;
-        }
-    }, { passive: false });
-
-    document.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        if (activeTouchedKey) {
-            activeTouchedKey.classList.remove('active');
-            sampler.triggerRelease(activeTouchedKey.dataset.note);
-            activeTouchedKey = null;
-        }
-    }, { passive: false });
+        }, { passive: false });
+    }
 
 </script>
 </body>

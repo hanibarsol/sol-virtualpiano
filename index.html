@@ -2,7 +2,7 @@
 <html lang="he">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>פסנתר בדיקה</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
@@ -15,12 +15,27 @@
             background-color: #222; 
             user-select: none; 
             -webkit-user-select: none; 
-            touch-action: none; 
+            /* חסימה הרקמטית לכל העמוד */
+            touch-action: none !important; 
             -webkit-touch-callout: none;
         }
         #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; display: flex; justify-content: center; align-items: center; z-index: 100; cursor: pointer; font-size: 24px; }
-        #piano-container { display: flex; justify-content: center; align-items: flex-start; width: 100%; height: 80vh; padding-top: 5vh; }
-        .piano { display: flex; position: relative; direction: ltr; height: 100%; }
+        #piano-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            width: 100%; 
+            height: 80vh; 
+            padding-top: 5vh;
+            touch-action: none !important;
+        }
+        .piano { 
+            display: flex; 
+            position: relative; 
+            direction: ltr; 
+            height: 100%;
+            touch-action: none !important;
+        }
         
         .key { 
             position: relative; 
@@ -34,8 +49,8 @@
             padding-bottom: 15px; 
             z-index: 10; 
             
-            /* קריטי ביותר עבור Pointer Capture בניידים! */
-            touch-action: none; 
+            /* הכרחי למנוע מהדפדפן לזהות גרירה כמחוות דפדוף */
+            touch-action: none !important; 
             
             -webkit-touch-callout: none;
             user-select: none;
@@ -78,6 +93,12 @@
     const startScreen = document.getElementById('start-screen');
     const pianoElement = document.getElementById('piano');
 
+    // חסימת מחוות דפדפן אגרסיבית ברמת ה-JS
+    // זה ימנע פיזית מהנייד לבטל את הלחיצה לטובת גלילה/זום ברגע שהאצבע זזה מילימטר
+    pianoElement.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+    pianoElement.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    pianoElement.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
+
     startScreen.addEventListener('click', async () => {
         await Tone.start();
         startScreen.style.display = 'none';
@@ -115,7 +136,7 @@
                 whiteKeyIndex++;
             }
 
-            // לוגיקת הפעלה
+            // לוגיקת הפעלה עם בדיקה כפולה
             const playNote = () => {
                 if (key.dataset.isPlaying === "true") return; 
                 key.dataset.isPlaying = "true";
@@ -135,16 +156,16 @@
                 } catch(err) { console.log(err); }
             };
 
-            // --- מנגנון Pointer Events אחוד (מחשב + נייד) ---
+            // --- שימוש ב-Pointer Events עם הגנה מלאה ---
 
             key.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
-                // הנועל הרשמי של האצבע לאלמנט
                 key.setPointerCapture(e.pointerId);
                 playNote();
             });
 
             key.addEventListener('pointermove', (e) => {
+                // מונע מהזזה קטנה בתוך גבולות הקליד לעורר אירועי מערכת
                 e.preventDefault();
             });
 

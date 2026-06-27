@@ -75,13 +75,9 @@
 </div>
 
 <script>
+    // שים לב שהסרנו את מאזיני ה-document.addEventListener הישנים למעלה
     const startScreen = document.getElementById('start-screen');
     const pianoElement = document.getElementById('piano');
-    
-    // מניעת כל התנהגויות ברירת המחדל של הנייד ברמת ה-document
-    document.addEventListener('touchstart', (e) => { if(e.target.closest('.key')) e.preventDefault(); }, { passive: false });
-    document.addEventListener('touchmove', (e) => { if(e.target.closest('.key')) e.preventDefault(); }, { passive: false });
-    document.addEventListener('touchend', (e) => { if(e.target.closest('.key')) e.preventDefault(); }, { passive: false });
 
     startScreen.addEventListener('click', async () => {
         await Tone.start();
@@ -110,8 +106,6 @@
             const key = document.createElement('div');
             key.className = `key ${isBlack ? 'black-key' : 'white-key'}`;
             key.dataset.note = fullNote;
-            
-            // שומר סף קריטי - האם הקליד מנגן כרגע פיזית?
             key.dataset.isPlaying = "false"; 
 
             if (!isBlack) {
@@ -122,11 +116,9 @@
                 whiteKeyIndex++;
             }
 
-            // --- לוגיקת הפעלה וכיבוי מוגנת ---
+            // לוגיקת הפעלה
             const playNote = () => {
-                // אם הוא כבר מנגן, אל תעשה כלום! (חוסם את הלולאה והתזוזה)
                 if (key.dataset.isPlaying === "true") return; 
-                
                 key.dataset.isPlaying = "true";
                 key.classList.add('active');
                 try {
@@ -134,10 +126,9 @@
                 } catch(err) { console.log(err); }
             };
 
+            // לוגיקת כיבוי
             const stopNote = () => {
-                // אם הוא לא מנגן, אין מה לכבות
                 if (key.dataset.isPlaying === "false") return; 
-                
                 key.dataset.isPlaying = "false";
                 key.classList.remove('active');
                 try {
@@ -145,38 +136,32 @@
                 } catch(err) { console.log(err); }
             };
 
-            // --- מאזינים למחשב (עכבר) בלבד ---
-            key.addEventListener('mousedown', (e) => { playNote(); });
-            key.addEventListener('mouseup', stopNote);
-            key.addEventListener('mouseleave', stopNote);
+            // --- מנגנון Pointer Events אחוד (מחשב + נייד) ---
 
-            // --- מאזינים לניידים (מגע) בלבד ---
-            // לחיצה ראשונית
-            key.addEventListener('touchstart', (e) => {
+            key.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
+                // הקסם: נועל את כל אירועי המגע הבאים לאלמנט הזה, לא משנה לאן האצבע תזוז
+                key.setPointerCapture(e.pointerId);
                 playNote();
-            }, { passive: false });
+            });
 
-            // הגנה מתזוזה: אם מזיזים את האצבע בתוך הקליד, אנחנו פשוט חוסמים את האירוע
-            key.addEventListener('touchmove', (e) => {
+            key.addEventListener('pointermove', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                // לא קוראים ל-playNote ולא ל-stopNote, פשוט משאירים את המצב הקיים
-            }, { passive: false });
+                // ברגע שיש פוינטר קאפצ'ר, האירוע הזה ימשיך לירות רק עבור הקליד המקורי
+                // אנחנו פשוט מונעים מהדפדפן לבצע פעולות גלילה/תזוזה מובנות
+            });
 
-            // עזיבה
-            key.addEventListener('touchend', (e) => {
+            key.addEventListener('pointerup', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
+                key.releasePointerCapture(e.pointerId);
                 stopNote();
-            }, { passive: false });
+            });
 
-            key.addEventListener('touchcancel', (e) => {
+            key.addEventListener('pointercancel', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
+                key.releasePointerCapture(e.pointerId);
                 stopNote();
-            }, { passive: false });
+            });
 
             pianoElement.appendChild(key);
         });
